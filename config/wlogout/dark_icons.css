@@ -1,0 +1,31 @@
+/*
+-----------------------------------------------------
+Buttons
+-----------------------------------------------------
+*/
+
+@define-color text_color #0f0f0f;
+
+#lock {
+	margin: 10px;
+	border-radius: 20px;
+	background-image: image(url("icons/dark_lock.png"));
+}
+
+#logout {
+	margin: 10px;
+	border-radius: 20px;
+	background-image: image(url("icons/dark_logout.png"));
+}
+
+#shutdown {
+    margin: 10px;
+	border-radius: 20px;
+	background-image: image(url("icons/dark_shutdown.png"));
+}
+
+#reboot {
+	margin: 10px;
+	border-radius: 20px;
+	background-image: image(url("icons/dark_reboot.png"));
+}
