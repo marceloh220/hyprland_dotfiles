@@ -7,11 +7,13 @@ archlinux-xdg-menu ark bat bibata-cursor-theme blueman brightnessctl btop cava c
 
 optional: visual-studio-code-bin
 
+Install oh-my-fish from https://github.com/oh-my-fish/oh-my-fish
+
 Step three: You may think that you don't need all these packages and you are right, but don't have they installed on your computer dont'n will make you better
 Some packages are from AUR, but if you install the chaotic-aur repository you will don't have any problem to install it with pacman
-Or you can install trizen or yay and install all aur-packages from aur repository, be happy discovering what package are from aur
+Or you can install trizen or yay and install all aur-packages from aur repository
 
-Step four: copy the content of config and local directory to your config and local directory
+Step four: copy the content of config directory to your config directory
 
 Step five: I take years stolen the betters wallpapers on internet and this selections of wallpaper have gens, and a lot of wallpapers that is disgosting and I dont know why I dont delete they yet
 Copy the wllpaper directory to your pictures path and make an favor to youself, delete half of these wallpapers. May the force guide you to chose wisely.
