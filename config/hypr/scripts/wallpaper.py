@@ -936,7 +936,7 @@ def kitty_set_color(color_list):
         #primary_colors.sort(key=lambda c: get_brightness(c))
         for line in config.splitlines():
             # seens work, but I will keep elif version. This version is more readable, but not faster
-            # mybe an macth case version is more efficienty?
+            # mybe an macth case version is more efficienty? I'm not sure about that, but I will try it later.
             target_colors =['#000000', '#cc0403', '#19cb00', '#cecb00', '#0d73cc', \
                             '#cb1ed1', '#0dcdcd', '#dddddd', '#767676', '#f2201f', \
                             '#23fd00', '#fffd00', '#1a8fff', '#fd28ff', '#14ffff', \
