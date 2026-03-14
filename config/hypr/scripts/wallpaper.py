@@ -935,8 +935,6 @@ def kitty_set_color(color_list):
                     break
         #primary_colors.sort(key=lambda c: get_brightness(c))
         for line in config.splitlines():
-            # seens work, but I will keep elif version. This version is more readable, but not faster
-            # mybe an macth case version is more efficienty? I'm not sure about that, but I will try it later.
             target_colors =['#000000', '#cc0403', '#19cb00', '#cecb00', '#0d73cc', \
                             '#cb1ed1', '#0dcdcd', '#dddddd', '#767676', '#f2201f', \
                             '#23fd00', '#fffd00', '#1a8fff', '#fd28ff', '#14ffff', \
@@ -948,42 +946,7 @@ def kitty_set_color(color_list):
                     # the config file is not in number ortder
                     print(f"Searching for color{i} in color list match the color target {target_colors[i]}")
                     break
-            """
-             by case of something goes wrong
-            if "color0 #" in line:
-                config = config.replace(line, f"color0 #{closest_color('#000000', color_list)}")
-            elif "color1 #" in line:
-                config = config.replace(line, f"color1 #{closest_color('#cc0403', color_list)}")
-            elif "color2 #" in line:
-                config = config.replace(line, f"color2 #{closest_color('#19cb00', color_list)}")
-            elif "color3 #" in line:
-                config = config.replace(line, f"color3 #{closest_color('#cecb00', color_list)}")
-            elif "color4 #" in line:
-                config = config.replace(line, f"color4 #{closest_color('#0d73cc', color_list)}")
-            elif "color5 #" in line:
-                config = config.replace(line, f"color5 #{closest_color('#cb1ed1', color_list)}")
-            elif "color6 #" in line:
-                config = config.replace(line, f"color6 #{closest_color('#0dcdcd', color_list)}")
-            elif "color7 #" in line:
-                config = config.replace(line, f"color7 #{closest_color('#dddddd', color_list)}")
-            elif "color8 #" in line:
-                config = config.replace(line, f"color8 #{closest_color('#767676', color_list)}")
-            elif "color9 #" in line:
-                config = config.replace(line, f"color9 #{closest_color('#f2201f', color_list)}")
-            elif "color10 #" in line:
-                config = config.replace(line, f"color10 #{closest_color('#23fd00', color_list)}")
-            elif "color11 #" in line:
-                config = config.replace(line, f"color11 #{closest_color('#fffd00', color_list)}")
-            elif "color12 #" in line:
-                config = config.replace(line, f"color12 #{closest_color('#1a8fff', color_list)}")
-            elif "color13 #" in line:
-                config = config.replace(line, f"color13 #{closest_color('#fd28ff', color_list)}")
-            elif "color14 #" in line:
-                config = config.replace(line, f"color14 #{closest_color('#14ffff', color_list)}")
-            elif "color15 #" in line:
-                config = config.replace(line, f"color15 #{closest_color('#ffffff', color_list)}")
-            """
-    
+
         # Write the updated configuration back to the file
         with open(config_path, "w") as f:
             f.write(config)
