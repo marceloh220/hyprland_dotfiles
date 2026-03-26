@@ -67,6 +67,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
+import subprocess
 import os
 import random
 import sys
@@ -456,7 +457,7 @@ def hyprland_set_wallpaper(image_path):
     # For Hyprland, we need to save the image in a specific directory
     img_resized.save(userDirectory + ".config/hypr/wallpaper.png", format='PNG')
     # Restart Hyprpaper to apply the new wallpaper
-    os.system("killall hyprpaper &> /dev/null; hyprpaper &> /dev/null &")
+    subprocess.run(["sh", "-c", "killall hyprpaper &> /dev/null; hyprpaper &> /dev/null &"])
 
 def hyprland_set_border_color(color):
     """
@@ -672,7 +673,7 @@ def waybar_color(color):
             f.write(config)
             f.close()
     # Restart Waybar to apply the new configuration
-    os.system("killall waybar &> /dev/null; waybar &> /dev/null &")
+    subprocess.run(["sh", "-c", "killall waybar &> /dev/null; waybar &> /dev/null &"])
 
 def wlogout_set_color(color):
     """
@@ -889,51 +890,24 @@ def kitty_set_color(color_list):
         brightness = get_brightness(color_list[0])
         dark_color = darken_color(color_list[0], .6)  # Darken the color for normal
         light_color = lighten_color(color_list[0], .6)  # Lighten the color for destak
+        line_list = ["foreground #", "background #", "selection_foreground #", "selection_background #", \
+                            "cursor #", "cursor_text_color #"]
+        theme_list_dark = [dark_color, light_color, dark_color, light_color, light_color, dark_color]
+        theme_list_light = [light_color, dark_color, light_color, dark_color, dark_color, light_color]    
         if brightness < 128:
             # If color is dark, use dark theme in the kitty configuration
             for line in config.splitlines():
-                if "foreground #" in line:
-                    config = config.replace(line, f"foreground #{light_color}")
-                    break
-            for line in config.splitlines():
-                if "background #" in line:
-                    config = config.replace(line, f"background #{dark_color}")
-                    break
-            for line in config.splitlines():
-                if "selection_foreground #" in line:
-                    config = config.replace(line, f"selection_foreground #{light_color}")
-                    break
-            for line in config.splitlines():
-                if "selection_background #" in line:
-                    config = config.replace(line, f"selection_background  #{dark_color}")
-                    break
-            for line in config.splitlines():
-                if "cursor #" in line:
-                    config = config.replace(line, f"cursor #{light_color}")
-                    break
-            for line in config.splitlines():
-                if "cursor_text_color #" in line:
-                    config = config.replace(line, f"cursor_text_color #{dark_color}")
-                    break
+                for i in range(0, len(line_list)):
+                    if line_list[i] in line:
+                        config = config.replace(line, f"{line_list[i]}{theme_list_dark[i]}")
+                        break
         else:
-           # Else if color is light, use light theme in the kitty configuration
+            # Else if color is light, use light theme in the kitty configuration
             for line in config.splitlines():
-                if "foreground #" in line:
-                    config = config.replace(line, f"foreground #{dark_color}")
-                    break
-            for line in config.splitlines():
-                if "background #" in line:
-                    config = config.replace(line, f"background #{light_color}")
-                    break
-            for line in config.splitlines():
-                if "selection_foreground #" in line:
-                    config = config.replace(line, f"selection_foreground #{dark_color}")
-                    break
-            for line in config.splitlines():
-                if "selection_background #" in line:
-                    config = config.replace(line, f"selection_background #{light_color}")
-                    break
-        #primary_colors.sort(key=lambda c: get_brightness(c))
+                for i in range(0, len(line_list)):
+                    if line_list[i] in line:
+                        config = config.replace(line, f"{line_list[i]}{theme_list_light[i]}")
+                        break
         for line in config.splitlines():
             target_colors =['#000000', '#cc0403', '#19cb00', '#cecb00', '#0d73cc', \
                             '#cb1ed1', '#0dcdcd', '#dddddd', '#767676', '#f2201f', \
