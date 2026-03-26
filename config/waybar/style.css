@@ -20,6 +20,7 @@
 @define-color buttons_color    @normal_color;
 @define-color text_color       @normal_color;
 @define-color icon_color       @normal_color;
+@define-color tooltips_color   @border_color;
 
 * {
     font-family: "Fira Sans Semibold", "Font Awesome 6 Free", "Font Awesome 6 Brands", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
