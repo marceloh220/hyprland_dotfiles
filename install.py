@@ -82,7 +82,7 @@ def remove_omf():
 def copy_dotfiles():
     print("Copying dotfiles...")
     home_dir = os.path.expanduser("~")
-    dotfiles_dir = os.path.join(os.path.dirname(__main__.__file__), "config")
+    dotfiles_dir = f"./config"
     print("warning: This will overwrite your existing Hyprland configuration if it exists. Make sure to back up any important files before proceeding.")
     print("Type YES (Y/y) to continue if you understand the risks and want to proceed with copying the dotfiles:")
     response = input("Type YES to continue: ")
@@ -92,13 +92,13 @@ def copy_dotfiles():
     backup_needed = False
     for item in os.listdir(dotfiles_dir):
         src = os.path.join(dotfiles_dir, item)
-        dst = os.path.join(home_dir, f".config/{item}")
+        dst = os.path.join(home_dir, f"config/{item}")
         if os.path.exists(dst):
             backup_needed = True
             if not os.path.isdir(f"{home_dir}/.config_backup"):
                  os.makedirs(f"{home_dir}/.config_backup")
             print("Moving old configuration to backup if it exists...")
-            subprocess.run(["mv", "-rf", dst, f"{home_dir}/.config_backup"], check=False)
+            subprocess.run(["mv", "-f", dst, f"{home_dir}/.config_backup"], check=False)
         if os.path.isdir(src):
             print(f"Copying directory '{src}' to '{dst}'...")
             subprocess.run(["cp", "-rf", src, dst], check=True)
