@@ -53,15 +53,33 @@ def copy_dotfiles():
     print("Copying dotfiles...")
     home_dir = os.path.expanduser("~")
     dotfiles_dir = os.path.join(os.path.dirname(__main__.__file__), "config")
+    print("warning: This will overwrite your existing Hyprland configuration if it exists. Make sure to back up any important files before proceeding.")
+    print("Type YES (Y/y) to continue if you understand the risks and want to proceed with copying the dotfiles:")
+    response = input("Type YES to continue: ")
+    if response != "Y" and response != "y" and response != "YES" and response != "yes":
+        print("Copying dotfiles aborted by the user.")
+        sys.exit(0)
+    backup_needed = False
     for item in os.listdir(dotfiles_dir):
         src = os.path.join(dotfiles_dir, item)
         dst = os.path.join(home_dir, f".config/{item}")
+        if os.path.exists(dst):
+            backup_needed = True
+            if not os.path.isdir(f"{home_dir}/config_backup"):
+                 os.makedirs(f"{home_dir}/config_backup")
+            print("Moving old configuration to backup if it exists...")
+            subprocess.run(["mv", "-rf", dst, f"{home_dir}/config_backup"], check=False)
         if os.path.isdir(src):
             print(f"Copying directory '{src}' to '{dst}'...")
-            #subprocess.run(["cp", "-r", src, dst], check=True)
+            subprocess.run(["cp", "-rf", src, dst], check=True)
         else:
             print(f"Copying file '{src}' to '{dst}'...")
-            #subprocess.run(["cp", src, dst], check=True)
+            subprocess.run(["cp", "-f", src, dst], check=True)
+    subprocess.run(["chown", "-R", f"{os.getlogin()}:{os.getlogin()}", os.path.join(home_dir, ".config")], check=True)
+    subprocess.run(["xdg-user-dirs-update"], check=True)
+    if backup_needed:
+        print("Old configuration files were moved to a backup directory at '~/.config_backup'.")
+        print("You can review the backup directory and restore any necessary files if needed.")
 
 def connect_to_wifi(ssid, password):
     print(f"Connecting to Wi-Fi network '{ssid}'...")
