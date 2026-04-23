@@ -73,7 +73,7 @@ def remove_packages():
 
 def install_omf():
     print("Installing Oh My Fish...")
-    subprocess.run(["curl", "-L", "https://get.oh-my.fish", "|", "fish"], check=True)
+    subprocess.run(["curl", "-L", "https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install", "|", "fish"], check=True)
 
 def remove_omf():
     print("Removing Oh My Fish...")
