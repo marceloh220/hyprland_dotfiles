@@ -1,4 +1,4 @@
-#!/usb/bin/env python3
+#!/usr/bin/env python
 
 
 import __main__
@@ -21,7 +21,8 @@ def intall_packages():
                 "ueberzug ufw ufw-extras unrar unzip waybar wget wireplumber wlogout" +\
                 "xdg-desktop-portal-gtk xdg-desktop-portal-hyprland xdg-user-dirs-gtk yay zoxide"
     print(f"Installing packages...")
-    subprocess.run(["sudo", "pacman", "-S", "--noconfirm"] + pkg_list.split(), check=True)
+    subprocess.run(["sudo", "pacman", "-S", "--noconfirm", "yay"], check=True)  
+    subprocess.run(["yay", "-S", "--noconfirm"] + pkg_list.split(), check=True)
 
 def install_cachy_repository():
     print("Adding CachyOS repository...")
@@ -74,4 +75,3 @@ if __name__ == "__main__":
         intall_packages()
     if args.copy_dotfiles:
         copy_dotfiles()
-        
