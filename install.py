@@ -8,18 +8,18 @@ import sys
 import argparse
 
 def intall_packages():
-    pkg_list = "archlinux-xdg-menu ark bat bibata-cursor-theme blueman brightnessctl btop cava clang cliphist coolercontrol" +\
-               "dolphin dolphin-plugins dunst eza fastfetch ffmpegthumbnailer falkon fish fzf git grimblast" +\
-               "gst-libav gst-plugins-bad gst-plugins-base gst-plugins-good gst-plugins-ugly" +\
-               "hyprcursor hypridle hyprland hyprlock hyprpaper hyprpicker" +\
-                "imagemagick ipython jq kate kde-cli-tools kio-admin kitty kitty-shell-integration kitty-terminfo kompare" +\
-                "linux linux-firmware sddm mpc mpd mpv nano neovim networkmanager noto-fonts npm nwg-look" +\
-                "openssh otf-fira-sans pamixer pavucontrol pipewire-alsa pipewire-jack pipewire-pulse" +\
-                "polkit-kde-agent power-profiles-daemon python-matplotlib python-numpy python-pandas python-pillow python-pyqt6 python-scikit-learn python-sympy" +\
-                "qt5-wayland qt5ct qt6-wayland qt6ct-kde qview ranger rmpc-git rofi-wayland" +\
-                "rsync thefuck tk trash-cli ttf-dejavu ttf-font-awesome ttf-liberation ttf-meslo-nerd" +\
-                "ueberzug ufw ufw-extras unrar unzip waybar wget wireplumber wlogout" +\
-                "xdg-desktop-portal-gtk xdg-desktop-portal-hyprland xdg-user-dirs-gtk yay zoxide"
+    pkg_list = "archlinux-xdg-menu ark bat bibata-cursor-theme blueman brightnessctl btop cava clang cliphist coolercontrol " +\
+               "dolphin dolphin-plugins dunst eza fastfetch ffmpegthumbnailer falkon fish fzf git grimblast " +\
+               "gst-libav gst-plugins-bad gst-plugins-base gst-plugins-good gst-plugins-ugly " +\
+               "hyprcursor hypridle hyprland hyprlock hyprpaper hyprpicker " +\
+                "imagemagick ipython jq kate kde-cli-tools kio-admin kitty kitty-shell-integration kitty-terminfo kompare " +\
+                "linux linux-firmware sddm mpc mpd mpv nano neovim networkmanager noto-fonts npm nwg-look " +\
+                "openssh otf-fira-sans pamixer pavucontrol pipewire-alsa pipewire-jack pipewire-pulse " +\
+                "polkit-kde-agent power-profiles-daemon python-matplotlib python-numpy python-pandas python-pillow python-pyqt6 python-scikit-learn python-sympy " +\
+                "qt5-wayland qt5ct qt6-wayland qt6ct-kde qview ranger rmpc-git rofi-wayland " +\
+                "rsync thefuck tk trash-cli ttf-dejavu ttf-font-awesome ttf-liberation ttf-meslo-nerd " +\
+                "ueberzug ufw ufw-extras unrar unzip waybar wget wireplumber wlogout " +\
+                "xdg-desktop-portal-gtk xdg-desktop-portal-hyprland xdg-user-dirs-gtk yay zoxide "
     print(f"Installing packages...")
     subprocess.run(["sudo", "pacman", "-S", "--noconfirm", "yay"], check=True)  
     subprocess.run(["yay", "-S", "--noconfirm"] + pkg_list.split(), check=True)
