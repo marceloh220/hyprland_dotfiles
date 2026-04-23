@@ -57,9 +57,11 @@ def copy_dotfiles():
         src = os.path.join(dotfiles_dir, item)
         dst = os.path.join(home_dir, f".config/{item}")
         if os.path.isdir(src):
-            subprocess.run(["cp", "-r", src, dst], check=True)
+            print(f"Copying directory '{src}' to '{dst}'...")
+            #subprocess.run(["cp", "-r", src, dst], check=True)
         else:
-            subprocess.run(["cp", src, dst], check=True)
+            print(f"Copying file '{src}' to '{dst}'...")
+            #subprocess.run(["cp", src, dst], check=True)
 
 def connect_to_wifi(ssid, password):
     print(f"Connecting to Wi-Fi network '{ssid}'...")
