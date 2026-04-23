@@ -8,6 +8,13 @@ import sys
 import argparse
 
 def intall_packages():
+    print("Warning: Some PKGS are not avaliable in official Arch repos, so they will be installed from AUR using yay.")
+    print("Make sure to review the PKGS list and the installation process for any errors.")
+    print("Type YES (Y/y) to continue if you understand the risks and want to proceed with the installation:")
+    response = input("Type YES to continue: ")
+    if response != "Y" and response != "y" and response != "YES" and response != "yes":
+        print("Installation aborted by the user.")
+        sys.exit(0)
     pkg_list = "archlinux-xdg-menu ark bat bibata-cursor-theme blueman brightnessctl btop cava clang cliphist coolercontrol " +\
                "dolphin dolphin-plugins dunst eza fastfetch ffmpegthumbnailer falkon fish fzf git grimblast " +\
                "gst-libav gst-plugins-bad gst-plugins-base gst-plugins-good gst-plugins-ugly " +\
@@ -17,12 +24,24 @@ def intall_packages():
                 "openssh otf-fira-sans pamixer pavucontrol pipewire-alsa pipewire-jack pipewire-pulse " +\
                 "polkit-kde-agent power-profiles-daemon python-matplotlib python-numpy python-pandas python-pillow python-pyqt6 python-scikit-learn python-sympy " +\
                 "qt5-wayland qt5ct qt6-wayland qt6ct-kde qview ranger rmpc-git rofi-wayland " +\
-                "rsync thefuck tk trash-cli ttf-dejavu ttf-font-awesome ttf-liberation ttf-meslo-nerd " +\
+                "rsync thefuck tk trash-cli ttf-dejavu ttf-font-awesome otf-font-awesome ttf-liberation ttf-meslo-nerd " +\
                 "ueberzug ufw ufw-extras unrar unzip waybar wget wireplumber wlogout " +\
-                "xdg-desktop-portal-gtk xdg-desktop-portal-hyprland xdg-user-dirs-gtk yay zoxide "
+                "xdg-desktop-portal-gtk xdg-desktop-portal-hyprland xdg-user-dirs-gtk zoxide "
+    print(f"Trying to install yay from the official Arch repositories...")
+    yay_in_repo = subprocess.run(["sudo", "pacman", "-S", "--noconfirm", "yay"], text=True)
+    if yay_in_repo.returncode != 0:
+        print("Failed to install yay. Installing yay from AUR...")
+        subprocess.run(["git", "clone", "https://aur.archlinux.org/yay.git"], check=True)
+        os.chdir("yay")
+        subprocess.run(["makepkg", "-si", "--noconfirm"], check=True)
+        os.chdir("..")
+        print("yay installed successfully. Cleaning up...")
+        subprocess.run(["rm", "-rf", "yay"], check=True)
+    print("yay is installed. Installing packages from the list...")
+    print(" Pay attention to the output for any errors during package installation.")
+    subprocess.run(["sleep", "5"], check=True)
     print(f"Installing packages...")
-    subprocess.run(["sudo", "pacman", "-S", "--noconfirm", "yay"], check=True)  
-    subprocess.run(["yay", "-S", "--noconfirm"] + pkg_list.split(), check=True)
+    subprocess.run(["yay", "-S"] + pkg_list.split(), check=True)
 
 def install_cachy_repository():
     print("Adding CachyOS repository...")
