@@ -163,9 +163,21 @@ if __name__ == "__main__":
     if args.wifi_ssid and args.wifi_password:
         connect_to_wifi(args.wifi_ssid, args.wifi_password)
 
-    if args.install_repository:
+    elif args.install_repository:
         install_cachy_repository()
-    if args.install_packages:
+    elif args.install_packages:
         intall_packages()
-    if args.copy_dotfiles:
+    elif args.copy_dotfiles:
         copy_dotfiles()
+    elif args.install_omf:
+        install_omf()
+    elif args.remove_repository:
+        remove_cachy_repository()
+    elif args.remove_packages:
+        remove_packages()
+    elif args.remove_omf:
+        remove_omf()
+    elif args.restore_dotfiles:
+        restore_dotfiles()
+    else:
+        print("No valid arguments provided. Use --help for more information.")
