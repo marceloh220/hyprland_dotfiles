@@ -29,6 +29,18 @@ def install_cachy_repository():
     subprocess.run(["tar", "xvf", "cachyos-repo.tar.xz", "&&", "cd", "cachyos-repo"], check=True)
     subprocess.run(["sudo", "./install.sh"], check=True)
 
+def copy_dotfiles():
+    print("Copying dotfiles...")
+    home_dir = os.path.expanduser("~")
+    dotfiles_dir = os.path.join(os.path.dirname(__main__.__file__), "config")
+    for item in os.listdir(dotfiles_dir):
+        src = os.path.join(dotfiles_dir, item)
+        dst = os.path.join(home_dir, f".config/{item}")
+        if os.path.isdir(src):
+            subprocess.run(["cp", "-r", src, dst], check=True)
+        else:
+            subprocess.run(["cp", src, dst], check=True)
+
 def connect_to_wifi(ssid, password):
     print(f"Connecting to Wi-Fi network '{ssid}'...")
     devices = subprocess.run(["iwd", "device", "list"], check=True, text=True)
@@ -47,6 +59,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Install Hyprland and related packages on Arch Linux.")
     parser.add_argument("-r", "--install-repository", action="store_true", help="Install the CachyOS repository")
     parser.add_argument("-i", "--install-packages", action="store_true", help="Install the list of packages")
+    parser.add_argument("-d", "--copy-dotfiles", action="store_true", help="Copy dotfiles to the user's home directory")
     parser.add_argument("-c", "--connect-wifi", action="store_true", help="Connect to a Wi-Fi network")
     parser.add_argument("--wifi-ssid", help="SSID of the Wi-Fi network to connect to")
     parser.add_argument("--wifi-password", help="Password for the Wi-Fi network")
@@ -59,3 +72,6 @@ if __name__ == "__main__":
         install_cachy_repository()
     if args.install_packages:
         intall_packages()
+    if args.copy_dotfiles:
+        copy_dotfiles()
+        
