@@ -17,16 +17,17 @@ def intall_packages():
         sys.exit(0)
     pkg_list = "archlinux-xdg-menu ark bat bibata-cursor-theme blueman brightnessctl btop cava clang cliphist coolercontrol " +\
                "dolphin dolphin-plugins dunst eza fastfetch ffmpegthumbnailer falkon fish fzf git grimblast " +\
-               "gst-libav gst-plugins-bad gst-plugins-base gst-plugins-good gst-plugins-ugly " +\
-               "hyprcursor hypridle hyprland hyprlock hyprpaper hyprpicker " +\
-                "imagemagick ipython jq kate kde-cli-tools kio-admin kitty kitty-shell-integration kitty-terminfo kompare " +\
-                "linux linux-firmware sddm mpc mpd mpv nano neovim networkmanager noto-fonts npm nwg-look " +\
-                "openssh otf-fira-sans pamixer pavucontrol pipewire-alsa pipewire-jack pipewire-pulse " +\
-                "polkit-kde-agent power-profiles-daemon python-matplotlib python-numpy python-pandas python-pillow python-pyqt6 python-scikit-learn python-sympy " +\
-                "qt5-wayland qt5ct qt6-wayland qt6ct-kde qview ranger rmpc-git rofi-wayland " +\
-                "rsync thefuck tk trash-cli ttf-dejavu ttf-font-awesome otf-font-awesome ttf-liberation ttf-meslo-nerd " +\
-                "ueberzug ufw ufw-extras unrar unzip waybar wget wireplumber wlogout " +\
-                "xdg-desktop-portal-gtk xdg-desktop-portal-hyprland xdg-user-dirs-gtk zoxide "
+               "gst-libav gst-plugins-{base,bad,good,ugly} " +\
+               "hypr{land,cursor,idle,lock,paper,picker} waybar wlogout rofi-wayland qview ranger " +\
+               "imagemagick jq kate kde-cli-tools kio-admin kitty kitty-{shell-integration,terminfo} kompare " +\
+               "linux linux-firmware sddm mpc mpd mpv rmpc-git nano neovim networkmanager npm nwg-look " +\
+               "openssh pamixer pavucontrol pipewire-alsa pipewire-jack pipewire-pulse " +\
+               "polkit-kde-agent power-profiles-daemon " +\
+               "ipython python-{matplotlib,numpy,pandas,pillow,pyqt6,scikit-learn,sympy,scipy} " +\
+               "qt5-wayland qt5ct qt6-wayland qt6ct-kde " +\
+               "rsync thefuck tk trash-cli noto-fonts ttf-{dejavu,font-awesomeo,liberation,meslo-nerd} otf-{fira-sans, font-awesome} " +\
+               "ueberzug ufw ufw-extras un{rar,zip} 7zip wget wireplumber " +\
+               "xdg-desktop-portal-{gtk,hyprland xdg-user-dirs-gtk zoxide "
     print(f"Trying to install yay from the official Arch repositories...")
     yay_in_repo = subprocess.run(["sudo", "pacman", "-S", "--noconfirm", "yay"], text=True)
     if yay_in_repo.returncode != 0:
@@ -42,7 +43,7 @@ def intall_packages():
     subprocess.run(["sleep", "5"], check=True)
     print(f"Installing packages...")
     subprocess.run(["yay", "-S"] + pkg_list.split(), check=True)
-
+    
 def install_cachy_repository():
     print("Adding CachyOS repository...")
     subprocess.run(["curl", "https://mirror.cachyos.org/cachyos-repo.tar.xz", "-o", "cachyos-repo.tar.xz"], check=True)
@@ -107,13 +108,24 @@ def copy_dotfiles():
             subprocess.run(["cp", "-f", src, dst], check=True)
     subprocess.run(["chown", "-R", f"{os.getlogin()}:{os.getlogin()}", os.path.join(home_dir, ".config")], check=True)
     subprocess.run(["chmod", "+x", os.path.join(home_dir, ".config/hypr/scripts/*")], check=True)
+    subprocess.run(["xdg-user-dirs-update"], check=True)
+    if ".local/state/mpd" not in os.listdir(home_dir):
+        os.makedirs(os.path.join(home_dir, ".local/state/mpd"))
+        subprocess.run(["chown", "-R", f"{os.getlogin()}:{os.getlogin()}", os.path.join(home_dir, ".local/state/mpd")], check=True)
+        subprocess.run(["touch", os.path.join(home_dir, ".local/state/mpd", "state")], check=True)
+    music_path = subprocess.run(["xdg-user-dir", "MUSIC"], check=True, text=True).stdout.strip()
+    with open(os.path.expanduser("~/.config/mpd/mpd.conf"), "w") as f:
+        for line in f:
+            if line.startswith("music_directory"):
+                f.write(f"music_directory    {music_path}\n")
+                break
+    subprocess.run(["systemctl", "enable", "--now", "--user", "mpd"], check=True)
     pictures_path = subprocess.run(["xdg-user-dir", "PICTURES"], check=True, text=True).stdout.strip()
     if not os.path.exists(pictures_path):
          os.makedirs(pictures_path)
     print(f"Copying wallpapers to '{pictures_path}'...")
     subprocess.run(["cp", "-r", ".Pictures/wallpapers", pictures_path], check=True)
     print("Updating XDG user directories...")
-    subprocess.run(["xdg-user-dirs-update"], check=True)
     if backup_needed:
         print("Old configuration files were moved to a backup directory at '~/.config_backup'.")
         print("You can review the backup directory and restore any necessary files if needed.")
