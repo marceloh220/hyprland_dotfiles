@@ -106,6 +106,13 @@ def copy_dotfiles():
             print(f"Copying file '{src}' to '{dst}'...")
             subprocess.run(["cp", "-f", src, dst], check=True)
     subprocess.run(["chown", "-R", f"{os.getlogin()}:{os.getlogin()}", os.path.join(home_dir, ".config")], check=True)
+    subprocess.run(["chmod", "+x", os.path.join(home_dir, ".config/hypr/scripts/*")], check=True)
+    pictures_path = subprocess.run(["xdg-user-dir", "PICTURES"], check=True, text=True).stdout.strip()
+    if not os.path.exists(pictures_path):
+         os.makedirs(pictures_path)
+    print(f"Copying wallpapers to '{pictures_path}'...")
+    subprocess.run(["cp", "-r", ".Pictures/wallpapers", pictures_path], check=True)
+    print("Updating XDG user directories...")
     subprocess.run(["xdg-user-dirs-update"], check=True)
     if backup_needed:
         print("Old configuration files were moved to a backup directory at '~/.config_backup'.")
