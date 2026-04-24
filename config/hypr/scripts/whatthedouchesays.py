@@ -222,6 +222,7 @@ def gerador_aleatorio(modo="desmotivacional"):
         "Olha, um Wi-Fi sem senha. Internet gráts!",
         "Se você virar programador, é problema seu.",
         "O caminho do programador justo é cercado por todas as iniquidades dos idiotas e pela tirania dos bugs.",
+        "Eu tenho quatro softwares. Foram quatro C++, ai no quinto eu dei uma fraquejada e veio esse aqui.",
     ]
     if modo == "desmotivacional":
         return str(random.choice(frases_desmotivacionais))
