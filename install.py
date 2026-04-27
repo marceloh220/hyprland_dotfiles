@@ -1,158 +1,357 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-
-import __main__
 import os
 import subprocess
 import sys
 import argparse
+from pathlib import Path
 
-def intall_packages():
-    print("Warning: Some PKGS are not avaliable in official Arch repos, so they will be installed from AUR using yay.")
-    print("Make sure to review the PKGS list and the installation process for any errors.")
-    print("Type YES (Y/y) to continue if you understand the risks and want to proceed with the installation:")
-    response = input("Type YES to continue: ")
-    if response != "Y" and response != "y" and response != "YES" and response != "yes":
-        print("Installation aborted by the user.")
+
+PACKAGE_GROUPS = [
+    (
+        "network",
+        ["networkmanager"],
+    ),
+    (
+        "display manager",
+        ["sddm"],
+    ),
+    (
+        "audio",
+        ["pamixer", "pavucontrol", "pipewire-alsa", "pipewire-jack", "pipewire-pulse", "wireplumber"],
+    ),
+    (
+        "kde",
+        ["ark", "dolphin", "dolphin-plugins", "kate", "kompare", "kde-cli-tools", "kio-admin"],
+    ),
+    (
+        "web browser",
+        ["falkon"],
+    ),
+    (
+        "multimedia",
+        [
+            "ffmpegthumbnailer",
+            "qview",
+            "mpc",
+            "mpd",
+            "mpv",
+            "rmpc",
+            "gst-libav",
+            "gst-plugins-base",
+            "gst-plugins-bad",
+            "gst-plugins-good",
+            "gst-plugins-ugly",
+        ],
+    ),
+    (
+        "hyprland",
+        ["hyprland", "hyprcursor", "hypridle", "hyprlock", "hyprpaper", "hyprpicker"],
+    ),
+    (
+        "hyprland-extras",
+        [
+            "waybar",
+            "wlogout",
+            "rofi",
+            "blueman",
+            "brightnessctl",
+            "cliphist",
+            "dunst",
+            "grimblast-git",
+            "power-profiles-daemon",
+        ],
+    ),
+    (
+        "terminal",
+        ["kitty", "kitty-shell-integration", "kitty-terminfo", "imagemagick", "ueberzug"],
+    ),
+    (
+        "terminal-extra",
+        [
+            "ranger",
+            "nano",
+            "neovim",
+            "bat",
+            "btop",
+            "cava",
+            "rsync",
+            "git",
+            "wget",
+            "curl",
+            "thefuck",
+            "trash-cli",
+            "eza",
+            "fastfetch",
+            "fish",
+            "fzf",
+            "openssh",
+            "zoxide",
+        ],
+    ),
+    (
+        "polkit agent",
+        ["polkit-kde-agent", "hyprpolkitagent"],
+    ),
+    (
+        "python",
+        [
+            "ipython",
+            "python-matplotlib",
+            "python-numpy",
+            "python-pandas",
+            "python-pillow",
+            "python-pyqt6",
+            "python-scikit-learn",
+            "python-sympy",
+            "python-scipy",
+        ],
+    ),
+    (
+        "themes",
+        ["nwg-look", "bibata-cursor-theme", "qt5-wayland", "qt5ct", "qt6-wayland", "qt6ct-kde"],
+    ),
+    (
+        "fonts",
+        ["noto-fonts", "ttf-dejavu", "ttf-liberation", "ttf-meslo-nerd", "otf-fira-sans", "otf-font-awesome"],
+    ),
+    (
+        "firewall",
+        ["ufw", "ufw-extras"],
+    ),
+    (
+        "compression",
+        ["unrar", "unzip", "7zip"],
+    ),
+    (
+        "xdg",
+        ["xdg-desktop-portal-kde", "xdg-desktop-portal-hyprland", "xdg-user-dirs", "archlinux-xdg-menu"],
+    ),
+]
+
+
+def ask_confirmation(message: str) -> None:
+    response = input(message).strip()
+    if response not in {"Y", "y", "YES", "yes"}:
+        print("Operation aborted by the user.")
         sys.exit(0)
-    pkg_list = "archlinux-xdg-menu ark bat bibata-cursor-theme blueman brightnessctl btop cava clang cliphist coolercontrol " +\
-               "dolphin dolphin-plugins dunst eza fastfetch ffmpegthumbnailer falkon fish fzf git grimblast " +\
-               "gst-libav gst-plugins-{base,bad,good,ugly} " +\
-               "hypr{land,cursor,idle,lock,paper,picker} waybar wlogout rofi-wayland qview ranger " +\
-               "imagemagick jq kate kde-cli-tools kio-admin kitty kitty-{shell-integration,terminfo} kompare " +\
-               "linux linux-firmware sddm mpc mpd mpv rmpc-git nano neovim networkmanager npm nwg-look " +\
-               "openssh pamixer pavucontrol pipewire-alsa pipewire-jack pipewire-pulse " +\
-               "polkit-kde-agent power-profiles-daemon " +\
-               "ipython python-{matplotlib,numpy,pandas,pillow,pyqt6,scikit-learn,sympy,scipy} " +\
-               "qt5-wayland qt5ct qt6-wayland qt6ct-kde " +\
-               "rsync thefuck tk trash-cli noto-fonts ttf-{dejavu,font-awesomeo,liberation,meslo-nerd} otf-{fira-sans, font-awesome} " +\
-               "ueberzug ufw ufw-extras un{rar,zip} 7zip wget wireplumber " +\
-               "xdg-desktop-portal-{gtk,hyprland xdg-user-dirs-gtk zoxide "
-    print(f"Trying to install yay from the official Arch repositories...")
-    yay_in_repo = subprocess.run(["sudo", "pacman", "-S", "--noconfirm", "yay"], text=True)
-    if yay_in_repo.returncode != 0:
-        print("Failed to install yay. Installing yay from AUR...")
-        subprocess.run(["git", "clone", "https://aur.archlinux.org/yay.git"], check=True)
-        os.chdir("yay")
-        subprocess.run(["makepkg", "-si", "--noconfirm"], check=True)
-        os.chdir("..")
-        print("yay installed successfully. Cleaning up...")
-        subprocess.run(["rm", "-rf", "yay"], check=True)
-    print("yay is installed. Installing packages from the list...")
-    print(" Pay attention to the output for any errors during package installation.")
-    subprocess.run(["sleep", "5"], check=True)
-    print(f"Installing packages...")
-    subprocess.run(["yay", "-S"] + pkg_list.split(), check=True)
-    
-def install_cachy_repository():
+
+
+def list_all_packages() -> list[str]:
+    packages = []
+    for _, pkg_group in PACKAGE_GROUPS:
+        packages.extend(pkg_group)
+    return packages
+
+
+def print_packages_with_categories() -> None:
+    print("Packages to be processed:")
+    for category, pkg_group in PACKAGE_GROUPS:
+        print(f" - {' '.join(pkg_group)} ({category})")
+
+
+def ensure_yay_installed() -> None:
+    print("Trying to install yay from the official Arch repositories...")
+    yay_in_repo = subprocess.run(["sudo", "pacman", "-Sy", "--noconfirm", "yay"], text=True)
+    if yay_in_repo.returncode == 0:
+        print("yay is installed.")
+        return
+
+    print("Failed to install yay from official repositories. Installing yay from AUR...")
+    aur_dir = Path("yay")
+    if aur_dir.exists():
+        subprocess.run(["rm", "-rf", str(aur_dir)], check=True)
+
+    subprocess.run(["git", "clone", "https://aur.archlinux.org/yay.git"], check=True)
+    subprocess.run(["makepkg", "-si", "--noconfirm"], check=True, cwd=str(aur_dir))
+    subprocess.run(["rm", "-rf", str(aur_dir)], check=True)
+    print("yay installed successfully.")
+
+
+def install_packages() -> None:
+    print(
+        "Warning: Some packages may not be available in official Arch repos, "
+        "so they may be installed from AUR using yay."
+    )
+    print("Make sure to review the package list and the installation process for any errors.")
+    ask_confirmation("Type YES to continue if you understand the risks and want to proceed: ")
+
+    ensure_yay_installed()
+
+    print_packages_with_categories()
+    print("WARNING: Pay attention to the output for any errors during package installation.")
+    ask_confirmation("Type YES to continue if you understand the risks and want to proceed: ")
+
+    packages = list_all_packages()
+    print("Installing packages...")
+    subprocess.run(["yay", "-S", *packages], check=True)
+
+
+def intall_packages() -> None:
+    # Backward-compatible alias for the original misspelled function name.
+    install_packages()
+
+
+def install_cachy_repository() -> None:
     print("Adding CachyOS repository...")
     subprocess.run(["curl", "https://mirror.cachyos.org/cachyos-repo.tar.xz", "-o", "cachyos-repo.tar.xz"], check=True)
-    subprocess.run(["tar", "xvf", "cachyos-repo.tar.xz", "&&", "cd", "cachyos-repo"], check=True)
-    subprocess.run(["sudo", "./install.sh"], check=True)
+    subprocess.run(["tar", "xvf", "cachyos-repo.tar.xz"], check=True)
+    subprocess.run(["sudo", "./install.sh"], check=True, cwd="cachyos-repo")
 
-def remove_cachy_repository():
+
+def remove_cachy_repository() -> None:
     print("Removing CachyOS repository...")
     subprocess.run(["sudo", "rm", "-rf", "/etc/pacman.d/cachyos-mirrorlist"], check=True)
     subprocess.run(["sudo", "rm", "-rf", "/etc/pacman.conf.d/cachyos.conf"], check=True)
     subprocess.run(["sudo", "rm", "-rf", "/etc/pacman.d/cachyos-repo-keyring"], check=True)
 
-def remove_packages():
+
+def remove_packages() -> None:
     print("Removing packages...")
-    pkg_list = "archlinux-xdg-menu ark bat bibata-cursor-theme blueman brightnessctl btop cava clang cliphist coolercontrol " +\
-               "dolphin dolphin-plugins dunst eza fastfetch ffmpegthumbnailer falkon fish fzf git grimblast " +\
-               "gst-libav gst-plugins-bad gst-plugins-base gst-plugins-good gst-plugins-ugly " +\
-               "hyprcursor hypridle hyprland hyprlock hyprpaper hyprpicker " +\
-                "imagemagick ipython jq kate kde-cli-tools kio-admin kitty kitty-shell-integration kitty-terminfo kompare " +\
-                "linux linux-firmware sddm mpc mpd mpv nano neovim networkmanager noto-fonts npm nwg-look " +\
-                "openssh otf-fira-sans pamixer pavucontrol pipewire-alsa pipewire-jack pipewire-pulse " +\
-                "polkit-kde-agent power-profiles-daemon python-matplotlib python-numpy python-pandas python-pillow python-pyqt6 python-scikit-learn python-sympy " +\
-                "qt5-wayland qt5ct qt6-wayland qt6ct-kde qview ranger rmpc-git rofi-wayland " +\
-                "rsync thefuck tk trash-cli ttf-dejavu ttf-font-awesome otf-font-awesome ttf-liberation ttf-meslo-nerd " +\
-                "ueberzug ufw ufw-extras unrar unzip waybar wget wireplumber wlogout " +\
-                "xdg-desktop-portal-gtk xdg-desktop-portal-hyprland xdg-user-dirs-gtk zoxide "
-    subprocess.run(["yay", "-Rns"] + pkg_list.split(), check=True)
+    print("WARNING: This will remove a large number of packages, including some that may be essential for your system.")
+    print("Make sure to review the package list and the removal process for any errors.")
+    print_packages_with_categories()
+    print(" - yay (AUR helper)")
+    ask_confirmation("Type YES to continue if you understand the risks and want to proceed: ")
+    packages = list_all_packages()
+    print(f"Removing packages: {' '.join(packages)}")
+    subprocess.run(["yay", "-Rdns", *packages], check=True)
+    subprocess.run(["yay", "-Yc"], check=True)
+    subprocess.run(["sudo", "pacman", "-Rns", "yay"], check=True)
 
-def install_omf():
+
+def install_omf() -> None:
     print("Installing Oh My Fish...")
-    subprocess.run(["curl", "-L", "https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install", "|", "fish"], check=True)
+    subprocess.run(
+        [
+            "fish",
+            "-c",
+            "curl -L https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install | fish",
+        ],
+        check=True,
+    )
 
-def remove_omf():
+
+def remove_omf() -> None:
     print("Removing Oh My Fish...")
     subprocess.run(["omf", "uninstall"], check=True)
 
-def copy_dotfiles():
+
+def _update_mpd_music_directory(mpd_conf_path: Path, music_path: str) -> None:
+    if not mpd_conf_path.exists():
+        return
+
+    lines = mpd_conf_path.read_text(encoding="utf-8").splitlines()
+    new_lines = []
+    updated = False
+    for line in lines:
+        if line.strip().startswith("music_directory"):
+            new_lines.append(f'music_directory    "{music_path}"')
+            updated = True
+        else:
+            new_lines.append(line)
+
+    if not updated:
+        new_lines.append(f'music_directory    "{music_path}"')
+
+    mpd_conf_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+
+
+def copy_dotfiles() -> None:
     print("Copying dotfiles...")
-    home_dir = os.path.expanduser("~")
-    dotfiles_dir = f"./config"
-    print("warning: This will overwrite your existing Hyprland configuration if it exists. Make sure to back up any important files before proceeding.")
-    print("Type YES (Y/y) to continue if you understand the risks and want to proceed with copying the dotfiles:")
-    response = input("Type YES to continue: ")
-    if response != "Y" and response != "y" and response != "YES" and response != "yes":
-        print("Copying dotfiles aborted by the user.")
-        sys.exit(0)
+    home_dir = Path.home()
+    dotfiles_dir = Path("./config")
+    config_dir = home_dir / ".config"
+
+    print("WARNING: This may overwrite your existing Hyprland configuration.")
+    print("Old configuration files will be backed up if they exist, but make sure to back up important files.")
+    ask_confirmation("Type YES to continue if you understand the risks and want to proceed: ")
+
+    config_dir.mkdir(parents=True, exist_ok=True)
     backup_needed = False
-    for item in os.listdir(dotfiles_dir):
-        src = os.path.join(dotfiles_dir, item)
-        dst = os.path.join(home_dir, f"config/{item}")
-        if os.path.exists(dst):
+
+    for item in dotfiles_dir.iterdir():
+        src = item
+        dst = config_dir / item.name
+        if dst.exists():
             backup_needed = True
-            if not os.path.isdir(f"{home_dir}/.config_backup"):
-                 os.makedirs(f"{home_dir}/.config_backup")
+            backup_dir = home_dir / ".config_backup"
+            backup_dir.mkdir(parents=True, exist_ok=True)
             print("Moving old configuration to backup if it exists...")
-            subprocess.run(["mv", "-f", dst, f"{home_dir}/.config_backup"], check=False)
-        if os.path.isdir(src):
+            subprocess.run(["mv", "-f", str(dst), str(backup_dir)], check=False)
+
+        if src.is_dir():
             print(f"Copying directory '{src}' to '{dst}'...")
-            subprocess.run(["cp", "-rf", src, dst], check=True)
+            subprocess.run(["cp", "-rf", str(src), str(dst)], check=True)
         else:
             print(f"Copying file '{src}' to '{dst}'...")
-            subprocess.run(["cp", "-f", src, dst], check=True)
-    subprocess.run(["chown", "-R", f"{os.getlogin()}:{os.getlogin()}", os.path.join(home_dir, ".config")], check=True)
-    subprocess.run(["chmod", "+x", os.path.join(home_dir, ".config/hypr/scripts/*")], check=True)
+            subprocess.run(["cp", "-f", str(src), str(dst)], check=True)
+
+    user = os.getlogin()
+    subprocess.run(["chown", "-R", f"{user}:{user}", str(config_dir)], check=True)
+
+    hypr_scripts_dir = config_dir / "hypr" / "scripts"
+    if hypr_scripts_dir.exists() and hypr_scripts_dir.is_dir():
+        for script in hypr_scripts_dir.iterdir():
+            if script.is_file():
+                current_mode = script.stat().st_mode
+                script.chmod(current_mode | 0o111)
+
     subprocess.run(["xdg-user-dirs-update"], check=True)
-    if ".local/state/mpd" not in os.listdir(home_dir):
-        os.makedirs(os.path.join(home_dir, ".local/state/mpd"))
-        subprocess.run(["chown", "-R", f"{os.getlogin()}:{os.getlogin()}", os.path.join(home_dir, ".local/state/mpd")], check=True)
-        subprocess.run(["touch", os.path.join(home_dir, ".local/state/mpd", "state")], check=True)
-    music_path = subprocess.run(["xdg-user-dir", "MUSIC"], check=True, text=True).stdout.strip()
-    with open(os.path.expanduser("~/.config/mpd/mpd.conf"), "w") as f:
-        for line in f:
-            if line.startswith("music_directory"):
-                f.write(f"music_directory    {music_path}\n")
-                break
+
+    mpd_state_dir = home_dir / ".local" / "state" / "mpd"
+    if not mpd_state_dir.exists():
+        mpd_state_dir.mkdir(parents=True, exist_ok=True)
+        subprocess.run(["chown", "-R", f"{user}:{user}", str(mpd_state_dir)], check=True)
+        subprocess.run(["touch", str(mpd_state_dir / "state")], check=True)
+
+    music_path = subprocess.run(["xdg-user-dir", "MUSIC"], check=True, text=True, capture_output=True).stdout.strip()
+    _update_mpd_music_directory(config_dir / "mpd" / "mpd.conf", music_path)
+
     subprocess.run(["systemctl", "enable", "--now", "--user", "mpd"], check=True)
-    pictures_path = subprocess.run(["xdg-user-dir", "PICTURES"], check=True, text=True).stdout.strip()
-    if not os.path.exists(pictures_path):
-         os.makedirs(pictures_path)
+    pictures_path = subprocess.run(
+        ["xdg-user-dir", "PICTURES"], check=True, text=True, capture_output=True
+    ).stdout.strip()
+    pictures_dir = Path(pictures_path)
+    pictures_dir.mkdir(parents=True, exist_ok=True)
+
     print(f"Copying wallpapers to '{pictures_path}'...")
-    subprocess.run(["cp", "-r", ".Pictures/wallpapers", pictures_path], check=True)
+    subprocess.run(["cp", "-r", ".Pictures/wallpapers", str(pictures_dir)], check=True)
     print("Updating XDG user directories...")
+
     if backup_needed:
         print("Old configuration files were moved to a backup directory at '~/.config_backup'.")
         print("You can review the backup directory and restore any necessary files if needed.")
 
-def restore_dotfiles():
+
+def restore_dotfiles() -> None:
     print("Restoring dotfiles from backup...")
-    home_dir = os.path.expanduser("~")
-    backup_dir = os.path.join(home_dir, ".config_backup")
-    if not os.path.exists(backup_dir):
+    home_dir = Path.home()
+    backup_dir = home_dir / ".config_backup"
+    if not backup_dir.exists():
         print("No backup directory found. Cannot restore dotfiles.")
         sys.exit(1)
-    for item in os.listdir(backup_dir):
-        src = os.path.join(backup_dir, item)
-        dst = os.path.join(home_dir, f".config/{item}")
-        if os.path.isdir(src):
+
+    for item in backup_dir.iterdir():
+        src = item
+        dst = home_dir / ".config" / item.name
+        if src.is_dir():
             print(f"Restoring directory '{src}' to '{dst}'...")
-            subprocess.run(["cp", "-rf", src, dst], check=True)
+            subprocess.run(["cp", "-rf", str(src), str(dst)], check=True)
         else:
             print(f"Restoring file '{src}' to '{dst}'...")
-            subprocess.run(["cp", "-f", src, dst], check=True)
-    subprocess.run(["chown", "-R", f"{os.getlogin()}:{os.getlogin()}", os.path.join(home_dir, ".config")], check=True)
+            subprocess.run(["cp", "-f", str(src), str(dst)], check=True)
+
+    user = os.getlogin()
+    subprocess.run(["chown", "-R", f"{user}:{user}", str(home_dir / ".config")], check=True)
     subprocess.run(["xdg-user-dirs-update"], check=True)
     print("Dotfiles restored from backup successfully.")
 
-def connect_to_wifi(ssid, password):
+
+def connect_to_wifi(ssid: str, password: str) -> None:
     print(f"Connecting to Wi-Fi network '{ssid}'...")
-    devices = subprocess.run(["iwd", "device", "list"], check=True, text=True)
+    devices = subprocess.run(["iwctl", "device", "list"], check=True, text=True, capture_output=True)
     device = None
     for line in devices.stdout.splitlines():
         if "wlan" in line:
@@ -179,13 +378,16 @@ if __name__ == "__main__":
     parser.add_argument("--wifi-password", help="Password for the Wi-Fi network")
     args = parser.parse_args()
 
-    if args.wifi_ssid and args.wifi_password:
+    if args.connect_wifi:
+        if not args.wifi_ssid or not args.wifi_password:
+            print("To use --connect-wifi you must provide --wifi-ssid and --wifi-password.")
+            sys.exit(1)
         connect_to_wifi(args.wifi_ssid, args.wifi_password)
 
     elif args.install_repository:
         install_cachy_repository()
     elif args.install_packages:
-        intall_packages()
+        install_packages()
     elif args.copy_dotfiles:
         copy_dotfiles()
     elif args.install_omf:
