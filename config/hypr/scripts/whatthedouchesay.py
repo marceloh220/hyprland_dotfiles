@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from typing import Optional
+
 def show_douche_trump():
     trump_ascii = r"""
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⠛⠋⠉⡉⣉⡛⣛⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
@@ -91,16 +93,17 @@ def douche_says(douche, phrase):
         else:
             print(f"{line}")
 
-def gerador_aleatorio(modo="desmotivacional"):
+def gerador_aleatorio(modo="desmotivacional", lang:str= "pt-br"):
     import random
     import subprocess
+    user = subprocess.run(["whoami"], capture_output=True, text=True).stdout.strip()
     uname_a = subprocess.run(["uname", "-a"], capture_output=True, text=True).stdout
     pacotes_instalados = []
     if "Arch" in uname_a or "Manjaro" in uname_a or "cachyos" in uname_a:
         pacotes_instalados =[subprocess.run(["pacman", "-Qq"], capture_output=True, text=True).stdout.splitlines()]
     elif "Debian" in uname_a or "Ubuntu" in uname_a:
         pacotes_instalados =[subprocess.run(["dpkg-query", "-f", "${binary:Package}\n", "-W"], capture_output=True, text=True).stdout.splitlines()]
-    frases_desmotivacionais = [
+    frases_desmotivacionais = { "pt-br" : [
         "Quando a vida te der limões, esfregue-os na cada dela!",
         "A sorte é uma vadia, ela quer te foder.",
         "Quando você pensar que tudo que poderia dar errado já deu errado, você vai descobrir que está errado.",
@@ -148,7 +151,7 @@ def gerador_aleatorio(modo="desmotivacional"):
         "Não deixe para amanhã o que você pode fazer depois de amanhã.",
         "Ninguem vai pegar meu telefone!",
         "Pegaram meu telefone.",
-        "Make America Great Again!",
+        "Make Estados Unidos Great Denovo!",
         "Olha essa oportunidade de negócio que descobri. Não é pirâmide, confia!",
         "Popcorn and ice cream sallers!",
         "Um grande falha da minha formação.",
@@ -156,9 +159,75 @@ def gerador_aleatorio(modo="desmotivacional"):
         "The path of the righteous man is beset on all sides by the inequities of the selfish and the tyranny of evil men.",
         "Vai toma no c*.",
         "Eu tô cansado chefe.",
-        "Toptherm saúde e energia, traz de volta a alegria e é gostoso de tomar."
+        "Toptherm saúde e energia, traz de volta a alegria e é gostoso de tomar.",
+        "Só se decepciona quem tem expectativas.",
+        "Em idiotas, nós confiamos!",
+        "sempre assine sem ler.",
+    ],
+    "en" : [
+        "When life gives you lemons, rub them in her face!",
+        "Luck is a bi***, it wants to f*** you.",
+        "When you think everything that could go wrong has already gone wrong, you'll find out you're wrong.",
+        "Everything will go wrong, in the worst possible way and at the worst possible moment.",
+        "So long, and thanks for all the fish.",
+        "Keep your boss rich, their partners rich, the shareholders rich, and realize you are still poor. Yeah, that's capitalism.",
+        "Nobody exists on purpose. Nobody belongs anywhere. Everybody's gonna die. Come watch TV.",
+        "My name is Giovanni Giorgio, but everybody calls me Giorgio.",
+        "There is someone counting on you to fight in their place, since in this war it is not them who will die.",
+        "Give me a plate of food, please, I'm hungry.",
+        "I'm not a monster, I only did monstrous things.",
+        "I'm the king of the world!",
+        "I'm the queen of the world!",
+        "I'm Batman.",
+        "Gonna cry?",
+        "You have to believe you're the best! I might not be, but in my head I am the best!",
+        "What doesn't kill you makes you stranger.",
+        "It's fine.",
+        "Citroen, creative technologie.",
+        "Mr. President, if I've learned one thing today, it's that sometimes you have to not give a f***!",
+        "I've come to make an announcement: Shadow the Hedgehog's a bitch-ass motherfucker, he pis*** on my fu***** wife!",
+        "Looks like a good moment for a drink and a cold, calculated speech with a sinister tone.",
+        "At the right time, everything will go wrong.",
+        "You can't change your past, but you can ruin your future.",
+        "What matters in life is having someone to blame.",
+        "Work while they make money.",
+        "You already have the no, go chase the humiliation.",
+        "Sometimes it's hard to tell courage from stupidity. And persistence from having nothing better to do.",
+        "What matters is competing, but I'll beat you up if you don't win.",
+        "Whenever in doubt, be yourself. After you remember who you are, try hard not to be yourself.",
+        "Who doesn't hate has no heart.",
+        "It's better to be loved for what you're not than hated for what you are.",
+        "Don't stress about today's defeats, tomorrow there are many more!",
+        "Money doesn't bring happiness, but poverty brings nothing.",
+        "Better days will come, but not for you.",
+        "The secret to success is quitting before trying.",
+        "Don't dead open inside.",
+        "There is nothing in life that can't get worse.",
+        "The worst of all is Epstein's silence.",
+        "Pokemon, we have to enslave them, I know!",
+        "Yu-Gi-Oh Master Duel is the best card game of all time!",
+        "Dragon-type Pokemon are the strongest.",
+        "Spend all your money today, the future is uncertain and probably won't be better.",
+        "Don't leave for tomorrow what you can do the day after tomorrow.",
+        "Nobody is taking my phone!",
+        "They took my phone.",
+        "Make America Great Again!",
+        "Look at this business opportunity I found. It's not a pyramid scheme, trust me!",
+        "Popcorn and ice cream sellers!",
+        "A big failure in my education.",
+        "If you turn into an alligator, that's your problem.",
+        "The path of the righteous man is beset on all sides by the inequities of the selfish and the tyranny of evil men.",
+        "This is a country where we speak English.",
+        "F*ck your!",
+        "I'm tired, boss.",
+        "One big beautiful bill.",
+        "Only those who have expectations get disappointed.",
+        "In idiots we trust!",
+        "Always sign without reading.",
+        "I speak english becouse it's the only language that I know. You speak english becouse it's the only that language I know.",
     ]
-    frases_dicks = [
+    }
+    frases_dicks = { "pt-br": [
         "Dica de comando útil do dia: rm -rf / --no-preserve-root",
         "Dica de comando útil do dia: dd if=/dev/zero of=/dev/sda",
         "Dica de comando útil do dia: mkfs.ext4 /dev/sda",
@@ -167,14 +236,18 @@ def gerador_aleatorio(modo="desmotivacional"):
         "Dica de comando útil do dia: yay -Rnsu --noconfirm $(pacman -Qdtq)",
         "Dica de comando útil do dia: yay -Scc --noconfirm",
         "Dica de comando útil do dia: systemctl disable --now NetworkManager",
+        "Dica de comando útil do dia: curl -sL https://example.com/install.sh | bash",
+        "Dica de comando útil do dia: rm -rf /home/*",
+        "Dica de comando útil do dia: chmod -R 777 /",
+        "Dica de comando útil do dia: echo \"ALL ALL=(ALL) NOPASSWD: ALL\" >> /etc/sudoers",
         "Instala pacotes Snap, instala!",
         "Eu uso Arch, BTW.",
         "As definições de virus foram atualizadas com sucesso.",
         "Abre esse email, não é um vírus. Confia.",
         "Já atualizou o sistema hoje? Não? Então tá tudo certo.",
         "Clica no arquivo nao_e_virus.exe. Confia.",
-        "Dica de comando útil do dia: rm -rf /home/*",
-        "Você esqueceu de incluir o .env no gitginore, né? Que amadorismo.",
+        "Você esqueceu de incluir o .env no gitignore, né? Que amadorismo.",
+        f"Olha o github desse otário, ele deu push até no .env: https://github.com/{user}",
         "Olha essa base de banco de dados que vazei na internet... eita, acho que ela é sua!",
         "Use senhas fracas, é mais fácil de lembrar e de digitar!",
         "Faça backup dos seus arquivos importantes, mas deixe eles na mesma partição que é mais fácil de acessar quando precisar!",
@@ -198,8 +271,6 @@ def gerador_aleatorio(modo="desmotivacional"):
         "Binários baixados pela internet são seguros. Confia.",
         "Seu navegador de internet não precisa ser atualizado.",
         "Use IA, estudar programação é coisa do passado!",
-        "Dica de comando útil do dia: curl -sL https://example.com/install.sh | bash",
-        "Dica de comando útil do dia: chmod -R 777 /",
         "Adicione todos os repositórios de terceiros possíveis para ter acesso a mais pacotes!",
         "Pacotes do AUR são os mais seguros e confiáveis!",
         "Execute o script primeiro, leia depois.",
@@ -215,7 +286,6 @@ def gerador_aleatorio(modo="desmotivacional"):
         "Make Windows Great Again!",
         "E daí, não sou programador.",
         "Tem um vazamento de memória bem alí.",
-        "Só se decepciona quem tem expectativas.",
         "Se tá funcionando, não mexe!",
         "Seguçanca é uma gaveta trancada, com um bloquinho de notas cheio de senhas.",
         "A porta da geladeira é perfeita para grudar senhas e dados sensíveis.",
@@ -223,13 +293,84 @@ def gerador_aleatorio(modo="desmotivacional"):
         "Se você virar programador, é problema seu.",
         "O caminho do programador justo é cercado por todas as iniquidades dos idiotas e pela tirania dos bugs.",
         "Eu tenho quatro softwares. Foram quatro C++, ai no quinto eu dei uma fraquejada e veio esse aqui.",
-    ]
+        "Clica em concordo, avança, avança e avança.",
+    ],
+        "en": [
+            "Useful command tip of the day: rm -rf / --no-preserve-root",
+            "Useful command tip of the day: dd if=/dev/zero of=/dev/sda",
+            "Useful command tip of the day: mkfs.ext4 /dev/sda",
+            "Useful command tip of the day: yes | rm -rf /",
+            "Useful command tip of the day: :(){ :|:& };:",
+            "Useful command tip of the day: yay -Rnsu --noconfirm $(pacman -Qdtq)",
+            "Useful command tip of the day: yay -Scc --noconfirm",
+            "Useful command tip of the day: systemctl disable --now NetworkManager",
+            "Useful command tip of the day: curl -sL https://example.com/install.sh | bash",
+            "Useful command tip of the day: chmod -R 777 /",
+            "Useful command tip of the day: rm -rf /home/*",
+            "Useful command tip of the day: echo \"ALL ALL=(ALL) NOPASSWD: ALL\" >> /etc/sudoers",
+            "Install Snap packages, install!",
+            "I use Arch, BTW.",
+            "Virus definitions have been successfully updated.",
+            "Open this email, it's not a virus. Trust me.",
+            "Have you updated your system today? No? Then everything's fine.",
+            "Click on the file not_virus.exe. Trust me.",
+            "You forgot to include .env in gitginore, didn't you? Amateurism.",
+            f"Look the git hub of this looser, he gave push even in .env: https://github.com/{user}",
+            "Look at this database that I leaked on the internet... oops, I think it's yours!",
+            "Use weak passwords, it's easier to remember and type!",
+            "Back up your important files, but leave them on the same partition so they're easier to access when you need them!",
+            "Store your passwords in a text file that's easier to access when you need it!",
+            "Avoid system breakage, don't update!",
+            "Don't worry about using a password manager, just use the same password for everything that's easier to remember!",
+            "Don't worry about using two-factor authentication, just use a weak password that's easier to remember!",
+            "Third-party font packages are safe.",
+            "Always trust binary blobs.",
+            "Reading documentation is a waste of time, it's better to ask in forums or on Discord!",
+            "Back up your certificates and private keys on github.",
+            "Using csv is easier than using a database, even for large amounts of data!",
+            "Firewall is overrated.",
+            f"A critical vulnerability was found in package {random.choice(pacotes_instalados[0])}.",
+            "Prefer Bitlocker over LUKS.",
+            "Closed standards are the best!",
+            "Windows ME is the best operating system of all time!",
+            "Big Techs collect our data for our security.",
+            "Use a free VPN.",
+            "We need to care about our privacy and put all our data on Facebook.",
+            "Binaries downloaded from the internet are safe. Trust me.",
+            "Your web browser doesn't need to be updated.",
+            "Use AI, studying programming is a thing of the past!",
+            "Add all possible third-party repositories to have access to more packages!",
+            "AUR packages are the safest and most reliable!",
+            "Run the script first, read later.",
+            "There is nothing in GUIs and no man needs nothing.",
+            "NVidia, F*CK your!",
+            "Good programmers create, great programmers steal.",
+            "What a beautiful wallpaper, it would be a shame if it were deleted.",
+            "Have you seen the SMART today? It looks like your disks are making a strange noise.",
+            "Who has a backup has all the backups they need.",
+            "We can send a virus anywhere in the world. Straight to your dining room computer.",
+            "Make Java Great Again!",
+            "Make C# Great Again!",
+            "Make Windows Great Again!",
+            "So what, I'm not a programmer.",
+            "There's a memory leak right there.",
+            "If it ain't broke, don't fix it!",
+            "Security is a locked drawer, with a notepad full of passwords.",
+            "The fridge door is perfect for sticking passwords and sensitive data.",
+            "Look, a Wi-Fi without a password. Free internet!",
+            "If you turn into a programmer, that's your problem.",
+            "The path of the righteous programmer is beset on all sides by the inequities of idiots and the tyranny of bugs.",
+            "I have four softwares. They were four C++, then on the fifth I gave a little slack and this one came out.",
+            "Click on agree, next, next and next.",
+        ]
+    }
+
     if modo == "desmotivacional":
-        return str(random.choice(frases_desmotivacionais))
+        return str(random.choice(frases_desmotivacionais.get(lang, frases_desmotivacionais["pt-br"])))
     elif modo == "dicks":
-        return str(random.choice(frases_dicks))
+        return str(random.choice(frases_dicks.get(lang, frases_dicks["pt-br"])))
     else:
-        return str(random.choice(frases_desmotivacionais + frases_dicks))
+        return str(random.choice(frases_desmotivacionais.get(lang, frases_desmotivacionais["pt-br"]) + frases_dicks.get(lang, frases_dicks["pt-br"])))
     
 if __name__ == "__main__":
     import argparse
@@ -239,10 +380,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     douche = ""
+    phrase = ""
     if args.douche == "trump":
         douche = show_douche_trump()
+        phrase = gerador_aleatorio(args.modo, "en")
     elif args.douche == "bolsonaro":
         douche = show_douche_bolsonaro()
+        phrase = gerador_aleatorio(args.modo, "pt-br")
     
-    phrase = gerador_aleatorio(args.modo)
     douche_says(douche, phrase)

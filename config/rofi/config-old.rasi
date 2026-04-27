@@ -187,47 +187,47 @@ element {
 
 element normal.normal {
     background-color:            inherit;
-    text-color:                  @foreground;
+    text-color:                  @text-color-select;
 }
 
 element normal.urgent {
     background-color:            inherit;
-    text-color:                  @foreground;
+    text-color:                  @text-color-select;
 }
 
 element normal.active {
     background-color:            inherit;
-    text-color:                  @foreground;
+    text-color:                  @text-color-select;
 }
 
 element selected.normal {
     background-color:            @color5;
-    text-color:                  @foreground;
+    text-color:                  @text-color-select;
 }
 
 element selected.urgent {
     background-color:            inherit;
-    text-color:                  @foreground;
+    text-color:                  @text-color-select;
 }
 
 element selected.active {
     background-color:            inherit;
-    text-color:                  @foreground;
+    text-color:                  @text-color-select;
 }
 
 element alternate.normal {
     background-color:            inherit;
-    text-color:                  @foreground;
+    text-color:                  @text-color-select;
 }
 
 element alternate.urgent {
     background-color:            inherit;
-    text-color:                  @foreground;
+    text-color:                  @text-color-select;
 }
 
 element alternate.active {
     background-color:            inherit;
-    text-color:                  @foreground;
+    text-color:                  @text-color-select;
 }
 
 element-icon {
@@ -260,7 +260,7 @@ textbox {
     margin:                      0px;
     border-radius:               0px;
     background-color:            @background;
-    text-color:                  @foreground;
+    text-color:                  @text-color-select;
     vertical-align:              0.5;
     horizontal-align:            0.0;
 }
@@ -269,5 +269,5 @@ error-message {
     padding:                     15px;
     border-radius:               20px;
     background-color:            @background;
-    text-color:                  @foreground;
+    text-color:                  @text-color-select;
 }

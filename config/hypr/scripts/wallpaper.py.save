@@ -366,8 +366,8 @@ def hyprlock_set_color(color: str) -> None:
         current_config = f.read()
 
     brightness = get_brightness(color)
-    light_color = lighten_color(color,.8)
-    dark_color = darken_color(color,.5)
+    light_color = lighten_color(color)
+    dark_color = darken_color(color)
     text_color = "fafafaff" if brightness < 128 else "0a0a0aff"
 
     # Support both hyprlock variable schemas used in this repo.
@@ -453,7 +453,6 @@ def rofi_set_color(color: str) -> None:
     light_color = lighten_color(color)
     
     primary = light_color if brightness < 128 else dark_color
-    text_color_select = "fafafa" if brightness < 128 else "0a0a0a"
     color_rgb = hex_to_rgb(light_color)
     bg_rgba = f"rgba({color_rgb[0]}, {color_rgb[1]}, {color_rgb[2]}, 0.7)"
     
@@ -463,7 +462,6 @@ def rofi_set_color(color: str) -> None:
         r"(?m)^\s*on-surface-variant:\s*#[0-9a-fA-F]{6};\s*$": "    on-surface-variant: #fafafa;",
         r"(?m)^\s*on-primary-fixed:\s*#[0-9a-fA-F]{6};\s*$": f"    on-primary-fixed: #{dark_color};",
         r"(?m)^\s*background:\s*rgba\([^)]+\);\s*$": f"    background: {bg_rgba};",
-        r"(?m)^\s*text-color-select:\s*#[0-9a-fA-F]{6};\s*$": f"    text-color-select: #{text_color_select};",
     }
     update_config_file(config_path, updates)
 
@@ -498,7 +496,6 @@ def kitty_set_color(color_list: List[str]) -> None:
                      '#767676', '#f2201f', '#23fd00', '#fffd00', '#1a8fff', '#fd28ff', '#14ffff', '#ffffff']
     for i, target in enumerate(target_colors):
         match = closest_color(target, color_list)
-        print(f"Mapping target color {target} to closest extracted color {match}")
         if match:
             config = re.sub(f"color{i} #.*", f"color{i} #{match}", config)
     
