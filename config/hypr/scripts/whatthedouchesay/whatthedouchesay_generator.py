@@ -5,7 +5,7 @@ import random
 import subprocess
 from typing import List
 
-from whatthedouchesay_quotes import get_phrase_catalog
+from whatthedouchesay_quotes import get_douche_catalog
 
 
 def _run_command_output(command: List[str]) -> str:
@@ -29,19 +29,19 @@ def _get_installed_packages() -> List[str]:
     return []
 
 
-def gerador_aleatorio(modo: str = "desmotivacional", lang: str = "pt-br") -> str:
-    user = _run_command_output(["whoami"]).strip() or "unknown-user"
-    pacotes_instalados = _get_installed_packages()
-    pacote_aleatorio = random.choice(pacotes_instalados) if pacotes_instalados else "unknown-package"
+def douche_generator(modo: str = "desmotivational", lang: str = "en") -> str:
+    user = _run_command_output(["whoami"]).strip() or "douche"
+    pkg_installed = _get_installed_packages()
+    pkg_random = random.choice(pkg_installed) if pkg_installed else "douche-cli"
 
-    frases_desmotivacionais, frases_dicks = get_phrase_catalog(user, pacote_aleatorio)
+    quote_desmotivational, quote_dicks = get_douche_catalog(user, pkg_random)
 
-    idioma = lang.lower()
-    frases_desmotivacionais_idioma = frases_desmotivacionais.get(idioma, frases_desmotivacionais["pt-br"])
-    frases_dicks_idioma = frases_dicks.get(idioma, frases_dicks["pt-br"])
+    douche_language = lang.lower()
+    quote_desmotivational_language = quote_desmotivational.get(douche_language, quote_desmotivational["pt-br"])
+    quote_dicks_language = quote_dicks.get(douche_language, quote_dicks["pt-br"])
 
-    if modo == "desmotivacional":
-        return random.choice(frases_desmotivacionais_idioma)
+    if modo == "desmotivational":
+        return random.choice(quote_desmotivational_language)
     if modo == "dicks":
-        return random.choice(frases_dicks_idioma)
-    return random.choice(frases_desmotivacionais_idioma + frases_dicks_idioma)
+        return random.choice(quote_dicks_language)
+    return random.choice(quote_desmotivational_language + quote_dicks_language)

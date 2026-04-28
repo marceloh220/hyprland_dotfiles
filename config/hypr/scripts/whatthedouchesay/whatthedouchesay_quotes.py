@@ -4,7 +4,7 @@
 from typing import Dict, List, Tuple
 
 
-def get_frases_desmotivacionais() -> Dict[str, List[str]]:
+def get_quote_desmotivational() -> Dict[str, List[str]]:
     return {
         "pt-br": [
             "Quando a vida te der limões, esfregue-os na cada dela!",
@@ -74,6 +74,8 @@ def get_frases_desmotivacionais() -> Dict[str, List[str]]:
             "E nessa loucura, de dizer que não te quero. Vou negando as aparências, disfarçando as evidências.",
             "As pontas de plastico nos cadarços servem para um propósito terrível.",
             "Uno, dos, tres, quatorce...",
+            "Imposto é roubo.",
+            "Se comprar não é possuir pirataria não é roubo.",
         ],
         "en": [
             "When life gives you lemons, rub them in her face!",
@@ -152,11 +154,12 @@ def get_frases_desmotivacionais() -> Dict[str, List[str]]:
             "That's me in the China, that's me in the Ukraine, losing my rare earths.",
             "America F*CK YEAH!",
             "Oh Dany boy, the oil, the oil are calling.",
+            "If purchasing isn't ownership, piracy isn't theft.",
         ],
     }
 
 
-def get_frases_dicks(user: str, pacote_aleatorio: str) -> Dict[str, List[str]]:
+def get_quote_dicks(user: str, pacote_aleatorio: str) -> Dict[str, List[str]]:
     return {
         "pt-br": [
             "Dica de comando útil do dia: rm -rf / --no-preserve-root",
@@ -302,5 +305,5 @@ def get_frases_dicks(user: str, pacote_aleatorio: str) -> Dict[str, List[str]]:
     }
 
 
-def get_phrase_catalog(user: str, pacote_aleatorio: str) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
-    return get_frases_desmotivacionais(), get_frases_dicks(user, pacote_aleatorio)
+def get_douche_catalog(user: str, pacote_aleatorio: str) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
+    return get_quote_desmotivational(), get_quote_dicks(user, pacote_aleatorio)

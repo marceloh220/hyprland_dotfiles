@@ -5,7 +5,7 @@ import argparse
 from typing import List, Tuple
 
 from whatthedouchesay_ascii_art import BOLSONARO_ASCII, TRUMP_ASCII
-from whatthedouchesay_generator import gerador_aleatorio
+from whatthedouchesay_generator import douche_generator
 
 def show_douche_trump() -> str:
     return TRUMP_ASCII
@@ -53,17 +53,17 @@ def douche_says(douche: str, phrase: str) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Gerador de frases aleatórias de douches famosos.")
-    parser.add_argument("-m", "--modo", choices=["desmotivacional", "dicks", "todes"], default="todes", help="Modo de geração de frases.")
-    parser.add_argument("-d", "--douche", choices=["trump", "bolsonaro"], default="bolsonaro", help="Douche para usar na arte ASCII.")
+    parser.add_argument("-m", "--mode", choices=["desmotivational", "dicks", "todes"], default="todes", help="Modo de geração de frases.")
+    parser.add_argument("-d", "--douche", choices=["trump", "bolsonaro"], default="trump", help="Douche para usar na arte ASCII.")
     args = parser.parse_args()
     
     douche = ""
-    phrase = ""
+    quote = ""
     if args.douche == "trump":
         douche = show_douche_trump()
-        phrase = gerador_aleatorio(args.modo, "en")
+        quote = douche_generator(args.mode, "en")
     elif args.douche == "bolsonaro":
         douche = show_douche_bolsonaro()
-        phrase = gerador_aleatorio(args.modo, "pt-br")
+        quote = douche_generator(args.mode, "pt-br")
     
-    douche_says(douche, phrase)
+    douche_says(douche, quote)
