@@ -5,7 +5,7 @@ import random
 import subprocess
 from typing import List
 
-from whatthedouchesay_phrases import get_phrase_catalog
+from config.hypr.scripts.whatthedouchesay.whatthedouchesay_quotes import get_phrase_catalog
 
 
 def _run_command_output(command: List[str]) -> str:
