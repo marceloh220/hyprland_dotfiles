@@ -19,7 +19,7 @@ PACKAGE_GROUPS = [
     ),
     (
         "display manager",
-        ["sddm"],
+        ["sddm", "sddm-sugar-candy-git"],
     ),
     (
         "firewall",
@@ -35,17 +35,8 @@ PACKAGE_GROUPS = [
     ),
     (
         "hyprland-extras",
-        [
-            "blueman",
-            "brightnessctl",
-            "cliphist",
-            "dunst",
-            "grimblast-git",
-            "power-profiles-daemon",
-            "rofi",
-            "waybar",
-            "wlogout",
-        ],
+        ["blueman", "brightnessctl", "cliphist", "dunst", "grimblast-git", "power-profiles-daemon",
+         "rofi", "waybar", "wlogout"],
     ),
     (
         "kde",
@@ -53,19 +44,8 @@ PACKAGE_GROUPS = [
     ),
     (
         "multimedia",
-        [
-            "ffmpegthumbnailer",
-            "gst-libav",
-            "gst-plugins-bad",
-            "gst-plugins-base",
-            "gst-plugins-good",
-            "gst-plugins-ugly",
-            "mpc",
-            "mpd",
-            "mpv",
-            "qview",
-            "rmpc",
-        ],
+        ["ffmpegthumbnailer", "gst-libav", "gst-plugins-bad", "gst-plugins-base", "gst-plugins-good",
+         "gst-plugins-ugly", "mpc", "mpd", "mpv", "qview", "rmpc"],
     ),
     (
         "network",
@@ -77,17 +57,8 @@ PACKAGE_GROUPS = [
     ),
     (
         "python",
-        [
-            "ipython",
-            "python-matplotlib",
-            "python-numpy",
-            "python-pandas",
-            "python-pillow",
-            "python-pyqt6",
-            "python-scikit-learn",
-            "python-scipy",
-            "python-sympy",
-        ],
+        ["ipython", "python-matplotlib", "python-numpy", "python-pandas", "python-pillow", 
+         "python-pyqt6", "python-scikit-learn", "python-scipy", "python-sympy"],
     ),
     (
         "terminal",
@@ -95,26 +66,9 @@ PACKAGE_GROUPS = [
     ),
     (
         "terminal-extra",
-        [
-            "bat",
-            "btop",
-            "cava",
-            "curl",
-            "eza",
-            "fastfetch",
-            "fish",
-            "fzf",
-            "git",
-            "nano",
-            "neovim",
-            "openssh",
-            "ranger",
-            "rsync",
-            "thefuck",
-            "trash-cli",
-            "wget",
-            "zoxide",
-        ],
+        ["bat", "btop", "cava", "curl", "eza", "fastfetch", "fish", "fzf", "git",
+         "nano", "neovim", "openssh", "ranger", "rsync", "thefuck", "trash-cli",
+         "wget", "zoxide"],
     ),
     (
         "themes",
@@ -170,6 +124,12 @@ def ensure_yay_installed() -> None:
 
 
 def install_packages() -> None:
+    base_supported = ["cachyos", "arch", "manjaro", "endeavouros", "arcolinux", "garuda", "archcraft"]
+    base = subprocess.run(["lsb_release", "-cs"], check=True, text=True, capture_output=True).stdout.strip()
+
+    if base not in base_supported:
+        print("Warning: Your system is not based on Arch, this script will not work.")
+        sys.exit(1)
     print(
         "Warning: Some packages may not be available in official Arch repos, "
         "so they may be installed from AUR using yay."
@@ -182,15 +142,11 @@ def install_packages() -> None:
     print_packages_with_categories()
     print("WARNING: Pay attention to the output for any errors during package installation.")
     ask_confirmation("Type YES to continue if you understand the risks and want to proceed: ")
-
+    
+    subprocess.run(["yay", "-S", "fakeroot base-devel"])
     packages = list_all_packages()
     print("Installing packages...")
     subprocess.run(["yay", "-S", *packages], check=True)
-
-
-def intall_packages() -> None:
-    # Backward-compatible alias for the original misspelled function name.
-    install_packages()
 
 
 def install_cachy_repository() -> None:
@@ -271,6 +227,8 @@ def copy_dotfiles() -> None:
     config_dir.mkdir(parents=True, exist_ok=True)
     backup_needed = False
 
+    subprocess.run(["xdg-user-dirs-update"], check=True)
+
     for item in dotfiles_dir.iterdir():
         src = item
         dst = config_dir / item.name
@@ -298,8 +256,6 @@ def copy_dotfiles() -> None:
                 current_mode = script.stat().st_mode
                 script.chmod(current_mode | 0o111)
 
-    subprocess.run(["xdg-user-dirs-update"], check=True)
-
     mpd_state_dir = home_dir / ".local" / "state" / "mpd"
     if not mpd_state_dir.exists():
         mpd_state_dir.mkdir(parents=True, exist_ok=True)
@@ -317,7 +273,7 @@ def copy_dotfiles() -> None:
     pictures_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Copying wallpapers to '{pictures_path}'...")
-    subprocess.run(["cp", "-r", ".Pictures/wallpapers", str(pictures_dir)], check=True)
+    subprocess.run(["cp", "-r", "./Pictures/wallpapers", str(pictures_dir)], check=True)
     print("Updating XDG user directories...")
 
     if backup_needed:
@@ -348,6 +304,43 @@ def restore_dotfiles() -> None:
     subprocess.run(["xdg-user-dirs-update"], check=True)
     print("Dotfiles restored from backup successfully.")
 
+def sddm_theme_config() -> None:
+    print("Configuring SDDM theme...")
+    sddm_conf_path = Path("/etc/sddm.conf")
+    if not sddm_conf_path.exists():
+        print("SDDM configuration file not found. Skipping SDDM theme configuration.")
+        return
+
+    lines = sddm_conf_path.read_text(encoding="utf-8").splitlines()
+    new_lines = []
+    in_theme_section = False
+    theme_set = False
+
+    for line in lines:
+        stripped_line = line.strip()
+        if stripped_line.startswith("[Theme]"):
+            in_theme_section = True
+            new_lines.append(line)
+            continue
+
+        if in_theme_section:
+            if stripped_line.startswith("Current="):
+                new_lines.append("Current=sugar-candy")
+                theme_set = True
+            elif stripped_line.startswith("[") and not stripped_line.startswith("[Theme]"):
+                in_theme_section = False
+                new_lines.append(line)
+            else:
+                new_lines.append(line)
+        else:
+            new_lines.append(line)
+
+    if not theme_set:
+        new_lines.append("[Theme]")
+        new_lines.append("Current=sugar-candy")
+
+    sddm_conf_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+    print("SDDM theme configured successfully.")
 
 def connect_to_wifi(ssid: str, password: str) -> None:
     print(f"Connecting to Wi-Fi network '{ssid}'...")
@@ -369,6 +362,7 @@ if __name__ == "__main__":
     parser.add_argument("--install-packages", action="store_true", help="Install the list of packages")
     parser.add_argument("--install-omf", action="store_true", help="Install Oh My Fish")
     parser.add_argument("--copy-dotfiles", action="store_true", help="Copy dotfiles to the user's home directory")
+    parser.add_argument("--sddm-theme-config", action="store_true", help="Configure SDDM theme to sugar-candy")
     parser.add_argument("--remove-repository", action="store_true", help="Remove the CachyOS repository")
     parser.add_argument("--remove-packages", action="store_true", help="Remove the list of packages")
     parser.add_argument("--remove-omf", action="store_true", help="Remove Oh My Fish")
@@ -390,6 +384,8 @@ if __name__ == "__main__":
         install_packages()
     elif args.copy_dotfiles:
         copy_dotfiles()
+    elif args.sddm_theme_config:
+        sddm_theme_config()
     elif args.install_omf:
         install_omf()
     elif args.remove_repository:
