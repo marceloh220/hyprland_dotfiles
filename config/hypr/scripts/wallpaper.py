@@ -74,7 +74,7 @@ import sys
 import re
 import json
 import hashlib
-from typing import Optional, Tuple, List, Dict, Callable
+from typing import Optional, Tuple, List, Dict
 from PIL import Image
 from sklearn.cluster import KMeans
 import numpy as np
@@ -85,6 +85,26 @@ WALLPAPER_PATH = "Imagens/wallpapers"
 CACHE_DIR = os.path.join(os.path.expanduser("~"), ".cache", "wallpaper_script")
 CACHE_FILE = os.path.join(CACHE_DIR, "colors.json")
 testing_config_path = "../../"
+
+kitty_modes = ["Default", "Precise", "Random", "Monochrome", "Complementary"]
+
+def save_config(config_path: str) -> None:
+    subprocess.run(["cp", config_path, config_path+".bak"], check=True)
+
+def diff_configs(config_path: str) -> None:
+    with open(config_path, "r") as f:
+        config = f.read()
+    with open(config_path+".bak", "r") as f:
+        config_bak = f.read()
+    
+    if config != config_bak:
+        print(f"Configuration file {config_path.split('/')[-1]} updated:")
+        for line, line_bak in zip(config.splitlines(), config_bak.splitlines()):
+            if line != line_bak:
+                print(f"  - {line.strip()} (was: {line_bak.strip()})")
+    else:
+        print("No changes detected in the configuration file.")
+    print("")
 
 
 def get_config_dir() -> str:
@@ -347,6 +367,7 @@ def hyprland_set_border_color(color: str) -> None:
     """Sets the border color in Hyprland configuration."""
     validate_hex_color(color)
     config_path = os.path.join(get_config_dir(), "hypr", "window.conf")
+    save_config(config_path)
     
     active_border_color = lighten_color(color)
     inactive_border_color = darken_color(color)
@@ -356,11 +377,13 @@ def hyprland_set_border_color(color: str) -> None:
         r"col\.inactive_border\s*=.*": f"    col.inactive_border = rgba({inactive_border_color}aa)",
     }
     update_config_file(config_path, updates)
+    diff_configs(config_path)
 
 def hyprlock_set_color(color: str) -> None:
     """Sets the color in Hyprlock configuration."""
     validate_hex_color(color)
     config_path = os.path.join(get_config_dir(), "hypr", "hyprlock.conf")
+    save_config(config_path)
 
     with open(config_path, "r") as f:
         current_config = f.read()
@@ -392,12 +415,14 @@ def hyprlock_set_color(color: str) -> None:
         }
 
     update_config_file(config_path, updates)
+    diff_configs(config_path)
 
 
 def waybar_color(color: str) -> None:
     """Sets the color in Waybar configuration."""
     validate_hex_color(color)
     config_path = os.path.join(get_config_dir(), "waybar", "style.css")
+    save_config(config_path)
     
     light_color = lighten_color(color)
     dark_color = darken_color(color)
@@ -418,11 +443,13 @@ def waybar_color(color: str) -> None:
         r"@define-color border_color.*": f"@define-color border_color     #{border_color};",
     }
     update_config_file(config_path, updates, restart_svc="waybar")
+    diff_configs(config_path)
 
 def wlogout_set_color(color: str) -> None:
     """Sets the color in wlogout configuration."""
     validate_hex_color(color)
     config_path = os.path.join(get_config_dir(), "wlogout", "style.css")
+    save_config(config_path)
     
     brightness = get_brightness(color)
     if brightness < 128:
@@ -441,12 +468,14 @@ def wlogout_set_color(color: str) -> None:
         r"@define-color destak_color.*": f"@define-color destak_color #{destak_color};",
     }
     update_config_file(config_path, updates)
+    diff_configs(config_path)
 
 
 def rofi_set_color(color: str) -> None:
     """Sets the color in rofi configuration."""
     validate_hex_color(color)
     config_path = os.path.join(get_config_dir(), "rofi", "colors.rasi")
+    save_config(config_path)
     
     brightness = get_brightness(color)
     dark_color = darken_color(color)
@@ -466,11 +495,15 @@ def rofi_set_color(color: str) -> None:
         r"(?m)^\s*text-color-select:\s*#[0-9a-fA-F]{6};\s*$": f"    text-color-select: #{text_color_select};",
     }
     update_config_file(config_path, updates)
+    diff_configs(config_path)
 
 
-def kitty_set_color(color_list: List[str]) -> None:
+def kitty_set_color(color_list: List[str], mode: str = "Default") -> None:
     """Sets the color in kitty configuration."""
-    config_path = os.path.join(get_config_dir(), "kitty", "current-theme.conf")
+    if mode not in kitty_modes:
+        raise ValueError(f"Invalid mode. Supported modes are: {', '.join(kitty_modes)}.")
+    config_path = os.path.join(get_config_dir(), "kitty", "theme.conf")
+    save_config(config_path)
     
     for color in color_list:
         validate_hex_color(color)
@@ -481,29 +514,94 @@ def kitty_set_color(color_list: List[str]) -> None:
     brightness = get_brightness(color_list[0])
     dark_color = darken_color(color_list[0], .6)
     light_color = lighten_color(color_list[0], .6)
-    
-    theme_map = {
-        "foreground #": dark_color if brightness >= 128 else light_color,
-        "background #": light_color if brightness >= 128 else dark_color,
-        "selection_foreground #": light_color if brightness >= 128 else dark_color,
-        "selection_background #": dark_color if brightness >= 128 else light_color,
-        "cursor #": dark_color if brightness >= 128 else light_color,
-        "cursor_text_color #": light_color if brightness >= 128 else dark_color,
-    }
-    
-    for key, color_val in theme_map.items():
-        config = re.sub(f"{key}.*", f"{key}{color_val}", config)
+
+    if mode == "Default":
+        theme_values = {
+            "foreground": "a3a3a3",
+            "background": "0a0a0a",
+            "selection_foreground": "0a0a0a",
+            "selection_background": "a3a3a3",
+            "cursor": "a3a3a3",
+            "cursor_text_color": "0a0a0a",
+            "url_color": "0dcdcd",
+        }
+    else:
+        theme_values = {
+            "foreground": dark_color if brightness >= 128 else light_color,
+            "background": light_color if brightness >= 128 else dark_color,
+            "selection_foreground": light_color if brightness >= 128 else dark_color,
+            "selection_background": dark_color if brightness >= 128 else light_color,
+            "cursor": dark_color if brightness >= 128 else light_color,
+            "cursor_text_color": light_color if brightness >= 128 else dark_color,
+            "url_color": light_color if brightness >= 128 else dark_color,
+        }
+
+    # Use whitespace-tolerant replacements so themes with different spacing still update correctly.
+    for key in ["foreground", "background", "cursor", "cursor_text_color", "url_color"]:
+        config = re.sub(
+            rf"(?m)^\s*{key}\s+#[0-9a-fA-F]{{6}}\s*$",
+            f"{key} #{theme_values[key]}",
+            config,
+        )
+
+    selection_background_pattern = r"(?m)^\s*selection_background\s+#[0-9a-fA-F]{6}\s*$"
+    if re.search(selection_background_pattern, config):
+        config = re.sub(
+            selection_background_pattern,
+            f"selection_background #{theme_values['selection_background']}",
+            config,
+        )
+    else:
+        config += f"\nselection_background #{theme_values['selection_background']}\n"
+
+    selection_foreground_pattern = r"(?m)^\s*selection_foreground\s+#[0-9a-fA-F]{6}\s*$"
+    if re.search(selection_foreground_pattern, config):
+        config = re.sub(
+            selection_foreground_pattern,
+            f"selection_foreground #{theme_values['selection_foreground']}",
+            config,
+        )
+    else:
+        config = re.sub(
+            selection_background_pattern,
+            lambda m: f"{m.group(0)}\nselection_foreground #{theme_values['selection_foreground']}",
+            config,
+            count=1,
+        )
+
+    # kitty_modes = ["Default", "Precise", "Random", "Monochrome", "Complementary"]
+
     
     target_colors = ['#000000', '#cc0403', '#19cb00', '#cecb00', '#0d73cc', '#cb1ed1', '#0dcdcd', '#dddddd',
                      '#767676', '#f2201f', '#23fd00', '#fffd00', '#1a8fff', '#fd28ff', '#14ffff', '#ffffff']
-    for i, target in enumerate(target_colors):
-        match = closest_color(target, color_list)
-        print(f"Mapping target color {target} to closest extracted color {match}")
-        if match:
-            config = re.sub(f"color{i} #.*", f"color{i} #{match}", config)
+    if mode == "Default":
+        for i in range(16):
+            config = re.sub(f"color{i} #.*", f"color{i} {target_colors[i]}", config)
+    elif mode == "Precise":
+        for i, target in enumerate(target_colors):
+            match = closest_color(target, color_list)
+            if match:
+                config = re.sub(f"color{i} #.*", f"color{i} #{match}", config)
+    elif mode == "Random":
+        for i in range(16):
+            random_color = random.choice(color_list)
+            config = re.sub(f"color{i} #.*", f"color{i} #{random_color}", config)
+    elif mode == "Monochrome":
+        for i in range(16):
+            config = re.sub(f"color{i} #.*", f"color{i} #{color_list[0]}", config)
+    elif mode == "Complementary":
+        for c, i in zip(color_list, range(16)):
+            r, g, b = hex_to_rgb(c)
+            comp_r, comp_g, comp_b = (255 - r, 255 - g, 255 - b)
+            complementary_color = rgb_to_hex((comp_r, comp_g, comp_b))
+            config = re.sub(f"color{i} #.*", f"color{i} #{complementary_color}", config)
     
     with open(config_path, "w") as f:
         f.write(config)
+
+    subprocess.run(["kitty", "@", "set-colors", config_path], check=True)
+
+    diff_configs(config_path)
 
 def main() -> None:
     """Main function to run the wallpaper script."""
@@ -512,14 +610,22 @@ def main() -> None:
     if len(sys.argv) > 1:
         print(f"Argument provided: {sys.argv[1]}")
 
-    print("Checking arguments...")
-    if len(sys.argv) < 2 and not os.getenv("HYPRLAND_WALLPAPER"):
-        raise ValueError("Please provide an argument: 'Random' for a random wallpaper or the path to an image file.")
-    if sys.argv[1] not in ["Random"] and not os.path.exists(sys.argv[1]):
-        raise ValueError("Invalid argument. Please provide 'Random' or a valid image file path.")
+    random = False
+    kitty_mode = "Default"
+    image = None
+
+    for arg in sys.argv[1:]:
+        if arg == "Random":
+            random = True
+        elif arg in kitty_modes:
+            kitty_mode = arg
+        elif os.path.exists(arg):
+            image = arg
+        else:
+            print(f"Invalid argument: {arg}")
 
     print("Starting wallpaper script...")
-    if sys.argv[1] == "Random":
+    if not image:
         print("No image provided, selecting a random wallpaper...")
         wallpapers_dir = os.path.join(userDirectory, WALLPAPER_PATH)
         if not os.path.exists(wallpapers_dir):
@@ -527,7 +633,7 @@ def main() -> None:
         print(f"Looking for wallpapers in: {wallpapers_dir}")
         image = get_random_image(wallpapers_dir)
     else:
-        image = sys.argv[1]
+        image = image.strip('"')  # Remove quotes if the path is provided with them
         if not os.path.exists(image):
             raise FileNotFoundError(f"Image file does not exist: {image}")
         print(f"Using provided image: {image}")
@@ -535,23 +641,19 @@ def main() -> None:
             raise ValueError("Selected file is not a valid image format. Supported formats are: PNG, JPEG, BMP.")
 
     print(f"Selected wallpaper: {image}")
-    print("Setting wallpaper for Hyprland...")
     hyprland_set_wallpaper(image)
 
-    print("Extracting dominant colors (with caching)...")
     dominant_color = get_cached_dominant_colors(image, n_colors=16)
 
     if not dominant_color:
         raise ValueError("No dominant color found in the image.")
 
-    print("Colors extracted successfully.")
-    print("Updating all configurations...")
     hyprland_set_border_color(dominant_color[0])
     hyprlock_set_color(dominant_color[0])
     waybar_color(dominant_color[0])
     wlogout_set_color(dominant_color[0])
     rofi_set_color(dominant_color[0])
-    kitty_set_color(dominant_color)
+    kitty_set_color(dominant_color, mode=kitty_mode)
 
     print("All configurations updated successfully.")
     print(f"Primary color: {dominant_color[0]} (brightness: {get_brightness(dominant_color[0]):.0f})")

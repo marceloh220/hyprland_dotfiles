@@ -3,7 +3,7 @@
     "logo": {
 	"type": "kitty",    
         "source": "$(find \"${XDG_CONFIG_HOME:-$HOME/.config}/fastfetch/animal/\" -name \"*.jpg\" | sort -R | head -1)",
-        "height": 17,
+        "height": 8,
 	"padding" : {
 	   "top": 1	
 	}
@@ -18,7 +18,7 @@
         },
         {
             "type": "custom",
-            "format": "┌────────────────────────────────────────────────────────┐"
+            "format": "┌─────────────────────────────────────────┐"
         },
         {
             "type": "os",
@@ -61,7 +61,7 @@
         },
         {
             "type": "custom",
-            "format": "└────────────────────────────────────────────────────────┘"
+            "format": "└─────────────────────────────────────────┘"
         },
         
         {
@@ -70,7 +70,7 @@
         },
         {
             "type": "custom",
-            "format": "┌────────────────────────────────────────────────────────┐"
+            "format": "┌─────────────────────────────────────────┐"
         },
         {
             "type": "cpu",
@@ -91,32 +91,20 @@
         },
         {
             "type": "disk",
-			"key": "  󰋊 Raiz",
-			"folders": "/",
+						"key": "  󰋊 Disk",
+						"format": "{1} / {2} ({3})",
+						"folders": "/",
             "keyColor": "blue"
-		},
-		{
-			"type": "disk",
-			"key": "  󰋊 Home",
-			"folders": "/home",
-            "keyColor": "blue"
-		},
-		{
-			"type": "disk",
-			"key": "  󰋊 Files",
-			"folders": "/home/arquivos",
-      "keyColor": "blue"
-		},
-    {
-      "type": "custom",
-      "format": "└────────────────────────────────────────────────────────┘"
-    },
-	  {
-      "type": "colors",
-      "paddingLeft": 2,
-      "symbol": "circle"
-    },
-      "break"
-       
+				},
+    		{
+      			"type": "custom",
+      			"format": "└─────────────────────────────────────────┘"
+    		},
+	  		{
+      			"type": "colors",
+      			"paddingLeft": 2,
+      			"symbol": "circle"
+    		},
+      	"break"
     ]
 }

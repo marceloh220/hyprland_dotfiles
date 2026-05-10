@@ -1,10 +1,10 @@
 * {
-    background: rgba(71, 71, 71, 0.7);
-    primary: #474747;
+    background: rgba(167, 207, 218, 0.7);
+    primary: #749ca7;
     primary-fixed: #fbd7ff;
     primary-fixed-dim: #e7b6f0;
     on-primary: #462151;
-    on-primary-fixed: #141414;
+    on-primary-fixed: #749ca7;
     on-primary-fixed-variant: #5f3869;
     primary-container: #5f3869;
     on-primary-container: #fbd7ff;
@@ -45,5 +45,5 @@
     surface-container: #231e23;
     surface-container-high: #2e282e;
     surface-container-highest: #393338;
-    text-color-select: #fafafa;
+    text-color-select: #0a0a0a;
 }

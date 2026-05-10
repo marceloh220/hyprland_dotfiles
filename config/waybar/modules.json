@@ -1,18 +1,10 @@
-//  __  __           _       _
-// |  \/  | ___   __| |_   _| | ___  ___
-// | |\/| |/ _ \ / _` | | | | |/ _ \/ __|
-// | |  | | (_) | (_| | |_| | |  __/\__ \
-// |_|  |_|\___/ \__,_|\__,_|_|\___||___/
-//
-//
 {
-  // Workspaces
   "hyprland/workspaces": {
     "on-scroll-up": "hyprctl dispatch workspace r-1",
     "on-scroll-down": "hyprctl dispatch workspace r+1",
     "on-click": "activate",
     "active-only": false,
-    "all-outputs": true,
+    "all-outputs": false,
     "format": "{}",
     "format-icons": {
       "urgent": "",
@@ -24,7 +16,6 @@
     }
   },
 
-  // Taskbar
   "wlr/taskbar": {
     "format": "{icon}",
     "icon-size": 18,
@@ -41,7 +32,6 @@
     }
   },
 
-  // Hyprland Window
   "hyprland/window": {
     "max-length": 60,
     "rewrite": {
@@ -54,18 +44,15 @@
     "separate-outputs": true
   },
 
-  // Empty
   "custom/empty": {
     "format": ""
   },
 
-    // Tools
   "custom/tools": {
     "format": "",
     "tooltip-format": "Tools"
   },
 
-  // Cliphist
   "custom/cliphist": {
     "format": "",
     "on-click": "sleep 0.1 && ~/.config/hypr/scripts/cliphist.sh",
@@ -74,7 +61,6 @@
     "tooltip-format": "Left: Open clipboard Manager\nRight: Delete an entry\nMiddle: Clear list"
   },
 
-  // Updates Count
   "custom/updates": {
     "format": "  {}",
     "escape": true,
@@ -87,45 +73,37 @@
     "on-click-right": "kitty ~/.config/hypr/scripts/software.sh"
   },
 
-  // Wallpaper
   "custom/wallpaper": {
     "format": "",
-    "on-click": "~/.config/hypr/scripts/wallpaper.py Random",
+    "on-click": "~/.config/hypr/scripts/wallpaper.py Default",
     "tooltip-format": "Left: Select an random wallpaper"
   },
 
-  // Waybar Themes
   "custom/waybarthemes": {
     "format": "",
     "on-click": "~/.config/hypr/scripts/themeswitcher.sh",
     "tooltip-format": "Select a waybar theme"
   },
 
-  // Keybindings
   "custom/keybindings": {
     "format": "",
     "on-click": "~/.config/hypr/scripts/keybindings.sh",
     "tooltip": false
   },
 
-  // Calculator
   "custom/calculator": {
     "format": "",
     "on-click": "qalculate-gtk",
     "tooltip-format": "Open calculator"
   },
 
-  // Rofi Application Launcher
   "custom/appmenu": {
-    // START APPS LABEL
     "format": "Apps",
-    // END APPS LABEL
     "on-click": "sleep 0.2;pkill rofi || rofi -show drun -replace",
     "on-click-right": "~/.config/hypr/scripts/keybindings.sh",
     "tooltip-format": "Left: Open the application launcher\nRight: Show all keybindings"
   },
 
-  // Rofi Application Launcher
   "custom/appmenuicon": {
     "format": "",
     "on-click": "sleep 0.2;rofi -show drun -replace",
@@ -133,7 +111,6 @@
     "tooltip-format": "Left: Open the application launcher\nRight: Show all keybindings"
   },
 
-  // Power Menu
   "custom/exit": {
     "format": "",
     "on-click": "~/.config/hypr/scripts/wlogout.sh",
@@ -141,7 +118,6 @@
     "tooltip-format": "Left: Power menu\nRight: Lock screen"
   },
 
-  // SwayNC
   "custom/notification": {
     "tooltip-format": "Left: Notifications\nRight: Do not disturb",
     "format": "{icon}",
@@ -167,7 +143,6 @@
     "escape": true
   },
 
-  // Hyprshade
   "custom/hyprshade": {
     "format": "",
     "tooltip-format": "Toggle Screen Shader",
@@ -175,18 +150,16 @@
     "on-click-right": "sleep 0.5; ~/.config/hypr/scripts/hyprshade.sh rofi"
   },
 
-  // Hypridle inhibitor
   "custom/hypridle": {
     "format": "",
     "return-type": "json",
     "escape": true,
     "exec-on-event": true,
-    "interval": 10,
-    "exec": "~/.config/hypr/scripts/hypridle.sh status",
-    "on-click": "~/.config/hypr/scripts/hypridle.sh toggle"
+    "interval": 5,
+    "exec": "~/.config/hypr/scripts/hypridle.py --status",
+    "on-click": "~/.config/hypr/scripts/hypridle.py --toggle"
   },
 
-  // Keyboard State
   "keyboard-state": {
     "numlock": true,
     "capslock": true,
@@ -197,16 +170,14 @@
     }
   },
 
-  // System tray
   "tray": {
     "icon-size": 21,
     "spacing": 10
   },
 
-  // Clock
   "clock": {
-    "format": "{:%H:%M %A}",
-    "on-click": "flatpak run com.ml4w.calendar",
+    "format": "{:%a %d\t%H:%M}",
+    "on-click": "waycal",
     "timezone": "",
     "tooltip": false,
     "tooltip-format": "<span>{calendar}</span>",
@@ -221,7 +192,6 @@
     }
   },
 
-  // System
   "custom/system": {
     "format": "",
     "tooltip": true,
@@ -229,19 +199,16 @@
     "on-click": "~/.config/hypr/scripts/system-monitor.sh"
   },
 
-  // CPU
   "cpu": {
     "format": "/   {usage}% ",
     "on-click": "~/.config/hypr/scripts/system-monitor.sh"
   },
 
-  // Memory
   "memory": {
     "format": "/    {}% ",
     "on-click": "~/.config/hypr/scripts/system-monitor.sh"
   },
 
-  // Harddisc space used
   "disk#1": {
     "interval": 30,
     "format": " Raiz {percentage_used}% ",
@@ -260,7 +227,6 @@
     "format": "/ K {short}"
   },
 
-  // Group Hardware
   "group/hardware": {
     "orientation": "inherit",
     "drawer": {
@@ -273,18 +239,12 @@
       "bluetooth",
       "battery",
       "power-profiles-daemon",
-      //"custom/hypridle",
+      "custom/hypridle",
       "custom/cliphist",
       "custom/wallpaper"
-    	//"disk#1",
-    	//"disk#2",
-    	//"cpu",
-    	//"memory"
-    	//"hyprland/language"
     ]
   },
 
-  // Group Tools
   "group/tools": {
     "orientation": "inherit",
     "drawer": {
@@ -294,15 +254,12 @@
     },
     "modules": [
       "custom/tools",
-      //"custom/cliphist",
       "custom/wallpaper",
       "custom/hypridle",
       "custom/cliphist"
-      //"custom/hyprshade"
     ]
   },
 
-  // Group Links
   "group/links": {
     "orientation": "horizontal",
     "modules": [
@@ -311,7 +268,6 @@
     ]
   },
 
-  // Group Settings
   "group/settings": {
     "orientation": "inherit",
     "drawer": {
@@ -326,10 +282,8 @@
     ]
   },
 
-  // Network
   "network": {
     "format": "{ifname}",
-    //"format-wifi": " {essid} ({signalStrength}%)",
     "format-wifi": "",
     "format-ethernet": "  {ifname}",
     "format-disconnected": "Disconnected ⚠",
@@ -339,13 +293,12 @@
     "tooltip-format-disconnected": "Disconnected",
     "max-length": 50,
     "on-click": "~/.config/hypr/scripts/networkmanager.sh",
-    "on-click-right": "~/.config/hypr/scripts/nm-applet.sh toggle",
+    "on-click-right": "~/.config/hypr/scripts/nm-applet.sh toggle"
   },
 
-  // Battery
   "battery": {
     "states": {
-      // "good": 95,
+      "good": 95,
       "warning": 30,
       "critical": 15
     },
@@ -353,12 +306,11 @@
     "format-charging": "  {capacity}%",
     "format-plugged": "  {capacity}%",
     "format-alt": "{icon}  {time}",
-    // "format-good": "", // An empty format will hide the module
-    // "format-full": "",
+    "format-good": "",
+    "format-full": "",
     "format-icons": [" ", " ", " ", " ", " "]
   },
 
-  // Power Profiles Daemon
   "power-profiles-daemon": {
     "format": "{icon}",
     "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
@@ -371,9 +323,8 @@
     }
   },
 
-  // Pulseaudio
   "pulseaudio": {
-    // "scroll-step": 1, // %, can be a float
+    "scroll-step": 5,
     "format": "{icon}  {volume}%",
     "format-bluetooth": "{volume}% {icon} {format_source}",
     "format-bluetooth-muted": " {icon} {format_source}",
@@ -392,7 +343,6 @@
     "on-click": "pavucontrol"
   },
 
-  // Bluetooth
   "bluetooth": {
     "format": " {status}",
     "format-disabled": "",
@@ -402,16 +352,14 @@
     "format-no-controller": ""
   },
 
-  // Other
   "user": {
     "format": "{user}",
     "interval": 60,
     "icon": false
   },
 
-  // backlight:
   "backlight": {
-    "format": "{icon} {percent}%",
+    "format": "{icon}  {percent}%",
     "format-icons": [
       "",
       "",
@@ -433,15 +381,15 @@
   },
 
   "mpd": {
-	"format": "{stateIcon} {artist} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ",
-	"format-disconnected": "Disconnected ",
-	"format-stopped": "{stateIcon}Stopped ",
+	"format": "{stateIcon}\t",
+	"format-disconnected": "Disconnected\t",
+	"format-stopped": "{stateIcon}\t",
 	"interval": 2,
 	"consume-icons": {
-		"on": " " // Icon shows only when consume is on
+		"on": " "
 	},
 	"random-icons": {
-		"off": "<span color='#f53c3c'></span> ", // Icon grayed out when random is off
+		"off": "<span color='#f53c3c'></span> ",
 		"on": " "
 	},
 	"repeat-icons": {
@@ -454,11 +402,11 @@
 		"paused": "",
 		"playing": ""
 	},
-	"tooltip-format": "MPD (connected)\nLeft click play/pause\nRight Click open music player\nMouse scroll down next music\nMouse scroll up previous music",
+	"tooltip-format": "{artist} - {album}\n{songPosition} - {title}\n{elapsedTime:%M:%S}/{totalTime:%M:%S}",
 	"tooltip-format-disconnected": "MPD (disconnected)",
 	"on-click": "mpc toggle",
-	"on-click-right": "~/.config/hypr/scripts/rmpc.sh",
+	"on-click-right": "~/.config/hypr/scripts/rmpc.py",
 	"on-scroll-down": "mpc next && mpc stop && mpc play",
-    "on-scroll-up": "mpc prev && mpc stop && mpc play",
+    "on-scroll-up": "mpc prev && mpc stop && mpc play"
   }
 }

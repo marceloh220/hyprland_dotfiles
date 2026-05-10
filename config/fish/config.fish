@@ -1,8 +1,9 @@
 if status is-interactive
     # Commands to run in interactive sessions can go here
+		kitty @ set-colors -a ~/.config/kitty/theme.conf
 		zoxide init fish | source
     thefuck --alias | source
-		fastfetch
+		#fastfetch
 		#~/.config/hypr/scripts/whatthedouchesays.py
 end
 

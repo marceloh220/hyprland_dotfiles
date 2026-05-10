@@ -2,3 +2,6 @@ config/hypr/scripts/whatthedouchesay/__pycache__/
 config/hypr/scripts/whatthedouchesay/__pycache__/whatthedouchesay_ascii_art.cpython-313.pyc
 config/hypr/scripts/whatthedouchesay/__pycache__/whatthedouchesay_generator.cpython-313.pyc
 config/hypr/scripts/whatthedouchesay/__pycache__/whatthedouchesay_quotes.cpython-313.pyc
+config/mpd/database
+config/mpd/playlists
+config/mpd/sticker.sqlite

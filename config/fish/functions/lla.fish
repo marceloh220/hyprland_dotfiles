@@ -1,4 +1,3 @@
-function lla --wraps='exa --color=always --group-directories-first --icons=always -la' --description 'alias lla=exa --color=always --group-directories-first --icons=always -la'
-  exa --color=always --group-directories-first --icons=always -la $argv
-        
+function lla --wraps='exa --color=always --group-directories-first --icons=always -la' --wraps='ll -a' --description 'alias lla=ll -a'
+    ll -a $argv
 end

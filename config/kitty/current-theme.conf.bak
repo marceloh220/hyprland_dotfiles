@@ -8,14 +8,14 @@
 
 
 #: The basic colors
-foreground #4e3236
-background #e7cbcf
-foreground #4e3236
-selection_background #4e3236
-selection_foreground #e7cbcf
+foreground #a5a9b4
+background #0c101b
+foreground #a5a9b4
+selection_background #a5a9b4
+selection_foreground #0c101b
 #: Cursor colors
-cursor #4e3236
-cursor_text_color #e7cbcf
+cursor #a5a9b4
+cursor_text_color #0c101b
 #: URL underline color when hovering with mouse
 
 url_color #e5dbff
@@ -36,51 +36,51 @@ macos_titlebar_color #2b2b2c
 
 
 #: Tab bar colors
-foreground #4e3236
-background #e7cbcf
-foreground #4e3236
-background #e7cbcf
-background #e7cbcf
+foreground #a5a9b4
+background #0c101b
+foreground #a5a9b4
+background #0c101b
+background #0c101b
 tab_bar_margin_color none
 
 
 #: Colors for marks (marked text in the terminal)
-foreground #4e3236
-background #e7cbcf
-foreground #4e3236
-background #e7cbcf
-foreground #4e3236
-background #e7cbcf
+foreground #a5a9b4
+background #0c101b
+foreground #a5a9b4
+background #0c101b
+foreground #a5a9b4
+background #0c101b
 #: The basic 16 colors
 
 #: black
-color0 #3c8276
-color8 #2b827c
+color0 #dfd5ba
+color8 #975b4c
 
 #: red
-color1 #9ec690
-color9 #bbcb98
+color1 #4e4248
+color9 #cbb0c2
 
 #: green
-color2 #58a581
-color10 #8dc18e
+color2 #c26961
+color10 #bd843a
 
 #: yellow
-color3 #1b5c71
-color11 #66af87
+color3 #b8a397
+color11 #3b9bb8
 
 #: blue
-color4 #267076
-color12 #acc994
+color4 #325b98
+color12 #0e3343
 
 #: magenta
-color5 #78b98b
-color13 #3a917e
+color5 #676665
+color13 #d2bda0
 
 #: cyan
-color6 #4b9579
-color14 #489f82
+color6 #353a42
+color14 #89898f
 
 #: white
-color7 #092b5a
-color15 #104869
+color7 #c79674
+color15 #1a2334

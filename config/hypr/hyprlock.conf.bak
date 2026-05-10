@@ -9,8 +9,8 @@
 # Source colors
 source = colors.conf
 
-$color_normal = rgba(0c0c0cff)
-$color_destak = rgba(d1d1d1ff)
+$color_normal = rgba(e9f3f5ff)
+$color_destak = rgba(486268ff)
 $color_error =  rgba(21545dff)
 
 general {

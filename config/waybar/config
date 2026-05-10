@@ -31,12 +31,13 @@
 		//"group/quicklinks",
         "mpd",
         //"hyprland/window",
+        "hyprland/workspaces",
         "custom/empty"
     ],
 
     // Modules Center
     "modules-center": [
-        "hyprland/workspaces",
+        "clock",
         "custom/empty"
     ],
 
@@ -48,16 +49,14 @@
         "backlight",
         "network",
         //"bluetooth",
-        //"network",
 	    //"custom/hypridle",
-        //"battery", 
+        //"battery",
         //"power-profiles-daemon",
         "group/hardware",
         //"custom/cliphist",
         //"group/tools",
         "tray",
         //"custom/notification",
-        "custom/exit",
-        "clock"
+        "custom/exit"
     ]
 }

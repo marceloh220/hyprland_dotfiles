@@ -257,13 +257,19 @@ def copy_dotfiles() -> None:
                 script.chmod(current_mode | 0o111)
 
     mpd_state_dir = home_dir / ".local" / "state" / "mpd"
+    mpd_config_dir = config_dir / "mpd"
     if not mpd_state_dir.exists():
         mpd_state_dir.mkdir(parents=True, exist_ok=True)
         subprocess.run(["chown", "-R", f"{user}:{user}", str(mpd_state_dir)], check=True)
         subprocess.run(["touch", str(mpd_state_dir / "state")], check=True)
+    if mpd_config_dir.exists() and mpd_config_dir.is_dir():
+        subprocess.run(["chown", "-R", f"{user}:{user}", str(mpd_config_dir)], check=True)
+        subprocess.run(["touch", str(mpd_config_dir / "database")], check=True)
+        subprocess.run(["touch", str(mpd_config_dir / "sticker.sqlite")], check=True)
+        subprocess.run(["mkdir", "-p", str(mpd_config_dir / "playlists")], check=True)
 
     music_path = subprocess.run(["xdg-user-dir", "MUSIC"], check=True, text=True, capture_output=True).stdout.strip()
-    _update_mpd_music_directory(config_dir / "mpd" / "mpd.conf", music_path)
+    _update_mpd_music_directory(mpd_config_dir / "mpd.conf", music_path)
 
     subprocess.run(["systemctl", "enable", "--now", "--user", "mpd"], check=True)
     pictures_path = subprocess.run(
@@ -357,7 +363,12 @@ def connect_to_wifi(ssid: str, password: str) -> None:
     subprocess.run(["iwctl", "station", device, "connect", ssid, "password", password], check=True)
 
 if __name__ == "__main__":
+    username = os.getlogin()
+    if username == "root":
+        print("This script should not be run as root. Please run it as a regular user with sudo privileges.")
+        sys.exit(1)
     parser = argparse.ArgumentParser(description="Install Hyprland and related packages on Arch Linux.")
+    parser.add_argument("--add-wheel", action="store_true", help="Add the user to the wheel group for sudo access")
     parser.add_argument("--install-repository", action="store_true", help="Install the CachyOS repository")
     parser.add_argument("--install-packages", action="store_true", help="Install the list of packages")
     parser.add_argument("--install-omf", action="store_true", help="Install Oh My Fish")
@@ -377,7 +388,13 @@ if __name__ == "__main__":
             print("To use --connect-wifi you must provide --wifi-ssid and --wifi-password.")
             sys.exit(1)
         connect_to_wifi(args.wifi_ssid, args.wifi_password)
-
+    elif args.add_wheel:
+        print(f"Adding user '{username}' to the wheel group for sudo access...")
+        subprocess.run(["su"])
+        subprocess.run(["usermod", "-aG", "wheel", username], check=True)
+        subprocess.run(["echo", "%wheel ALL=(ALL) ALL", ">>", "/etc/sudoers"], check=True)
+        subprocess.run(["exit"])
+        print(f"User '{username}' added to the wheel group successfully.")
     elif args.install_repository:
         install_cachy_repository()
     elif args.install_packages:
