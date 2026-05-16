@@ -104,6 +104,25 @@ def print_packages_with_categories() -> None:
     for category, pkg_group in PACKAGE_GROUPS:
         print(f" - {' '.join(pkg_group)} ({category})")
 
+def verify_distribution() -> None:
+    base_supported = ("cachyos", "arch", "manjaro", "endeavouros", "arcolinux", "garuda", 
+                      "archcraft")
+    base = 'none'
+    try:
+        result = subprocess.run(["cat", "/etc/os-release"], text=True, capture_output=True)
+        for line in result.stdout.splitlines():
+            if line.startswith("ID="):
+                base = line.split('=')[1].strip().strip('"')
+                print(f"Base distribution detected: {base}")
+                return
+    except subprocess.CalledProcessError:
+        print("Failed to determine the base distribution.")
+        sys.exit(1)
+    if base.lower() not in base_supported:
+        print("Warning: Your system is not based on Arch, this script will not work.")
+        sys.exit(1)
+    
+
 
 def ensure_yay_installed() -> None:
     print("Trying to install yay from the official Arch repositories...")
@@ -124,12 +143,9 @@ def ensure_yay_installed() -> None:
 
 
 def install_packages() -> None:
-    base_supported = ["cachyos", "arch", "manjaro", "endeavouros", "arcolinux", "garuda", "archcraft"]
-    base = subprocess.run(["lsb_release", "-cs"], check=True, text=True, capture_output=True).stdout.strip()
+    
+    verify_distribution()
 
-    if base not in base_supported:
-        print("Warning: Your system is not based on Arch, this script will not work.")
-        sys.exit(1)
     print(
         "Warning: Some packages may not be available in official Arch repos, "
         "so they may be installed from AUR using yay."
@@ -143,7 +159,7 @@ def install_packages() -> None:
     print("WARNING: Pay attention to the output for any errors during package installation.")
     ask_confirmation("Type YES to continue if you understand the risks and want to proceed: ")
     
-    subprocess.run(["yay", "-S", "fakeroot base-devel"])
+    subprocess.run(["yay", "-S", "base-devel"])
     packages = list_all_packages()
     print("Installing packages...")
     subprocess.run(["yay", "-S", *packages], check=True)
@@ -310,6 +326,7 @@ def restore_dotfiles() -> None:
     subprocess.run(["xdg-user-dirs-update"], check=True)
     print("Dotfiles restored from backup successfully.")
 
+
 def sddm_theme_config() -> None:
     print("Configuring SDDM theme...")
     sddm_conf_path = Path("/etc/sddm.conf")
@@ -347,6 +364,7 @@ def sddm_theme_config() -> None:
 
     sddm_conf_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
     print("SDDM theme configured successfully.")
+
 
 def connect_to_wifi(ssid: str, password: str) -> None:
     print(f"Connecting to Wi-Fi network '{ssid}'...")
@@ -415,3 +433,6 @@ if __name__ == "__main__":
         restore_dotfiles()
     else:
         print("No valid arguments provided. Use --help for more information.")
+        sys.exit(1)
+
+    sys.exit(0)
