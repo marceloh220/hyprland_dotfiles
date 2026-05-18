@@ -6,7 +6,6 @@ import argparse
 
 def check_hypridle_state() -> bool:
     state = subprocess.run(['systemctl', '--user', 'is-active', 'hypridle'], capture_output=True, text=True)
-    print(state.stdout.strip())
     if state.stdout.strip() == "active":
         return True
     else:
