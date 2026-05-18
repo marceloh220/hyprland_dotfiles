@@ -80,7 +80,6 @@ from sklearn.cluster import KMeans
 import numpy as np
 import math
 
-RESOLUTION: Tuple[int, int] = (1920, 1080)
 WALLPAPER_PATH = "Imagens/wallpapers"
 CACHE_DIR = os.path.join(os.path.expanduser("~"), ".cache", "wallpaper_script")
 CACHE_FILE = os.path.join(CACHE_DIR, "colors.json")
@@ -88,8 +87,31 @@ testing_config_path = "../../"
 
 kitty_modes = ["Default", "Precise", "Random", "Monochrome", "Complementary"]
 
+def get_monitor_resolution() -> Tuple[int, int]:
+    """Get the current monitor resolution using Hyprctl."""
+    try:
+        result = subprocess.run(["hyprctl", "monitors", "-j"], capture_output=True, text=True, check=True)
+        monitors = json.loads(result.stdout)
+        if not monitors:
+            raise RuntimeError("No monitors found.")
+
+        monitor = next((m for m in monitors if m.get("focused")), monitors[0])
+        width = monitor.get("width")
+        height = monitor.get("height")
+
+        if not isinstance(width, int) or not isinstance(height, int):
+            raise RuntimeError("Monitor width/height not found in hyprctl output.")
+        
+        print(f"Detected monitor resolution: {width}x{height}")
+
+        return width, height
+    except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
+        raise RuntimeError(f"Failed to get monitor resolution: {e}")
+
+
 def save_config(config_path: str) -> None:
     subprocess.run(["cp", config_path, config_path+".bak"], check=True)
+
 
 def diff_configs(config_path: str) -> None:
     with open(config_path, "r") as f:
@@ -116,14 +138,6 @@ def validate_hex_color(color: str) -> None:
         raise ValueError("Color must be a hex string of length 6 (e.g., 'ff0000' for red).")
     if not all(c in '0123456789abcdefABCDEF' for c in color):
         raise ValueError("Color must be a valid hex string (e.g., 'ff0000' for red).")
-
-
-def restart_service(service_name: str) -> None:
-    """Restart a service gracefully."""
-    subprocess.run(
-        ["sh", "-c", f"killall {service_name} &> /dev/null; {service_name} &> /dev/null &"],
-        capture_output=True,
-    )
 
 
 def get_image_hash(image_path: str) -> str:
@@ -166,7 +180,7 @@ def get_cached_dominant_colors(image_path: str, n_colors: int = 16) -> List[str]
     return colors
 
 
-def update_config_file(config_path: str, updates: Dict[str, str], restart_svc: Optional[str] = None) -> None:
+def update_config_file(config_path: str, updates: Dict[str, str]) -> None:
     """Generic function to update config file with multiple regex substitutions.
     
     Args:
@@ -185,9 +199,7 @@ def update_config_file(config_path: str, updates: Dict[str, str], restart_svc: O
     
     with open(config_path, "w") as f:
         f.write(config)
-    
-    if restart_svc:
-        restart_service(restart_svc)
+
 
 def extract_dominant_colors(image_path: str, n_colors: int = 1) -> List[str]:
     """
@@ -298,6 +310,7 @@ def get_brightness(color: str) -> float:
     color_rgb = hex_to_rgb(color)
     return (color_rgb[0] * 0.299) + (color_rgb[1] * 0.587) + (color_rgb[2] * 0.114)
 
+
 def get_random_image(directory):
     """ 
     Returns a random image file from the specified directory.
@@ -326,6 +339,7 @@ def get_random_image(directory):
     # Select a random image from the list
     return os.path.join(directory, random.choice(images))
 
+
 def hyprland_set_wallpaper(image_path: str) -> None:
     """Sets the wallpaper for Hyprland desktop environment."""
     config_base = get_config_dir()
@@ -334,11 +348,13 @@ def hyprland_set_wallpaper(image_path: str) -> None:
     if not os.path.exists(image_path):
         raise FileNotFoundError(f"Image file not found: {image_path}")
     
-    if not isinstance(RESOLUTION, tuple) or len(RESOLUTION) != 2:
+    resolution = get_monitor_resolution()
+    
+    if not isinstance(resolution, tuple) or len(resolution) != 2:
         raise ValueError("Resolution must be a tuple of (width, height).")
-    if not all(isinstance(dim, int) for dim in RESOLUTION):
+    if not all(isinstance(dim, int) for dim in resolution):
         raise ValueError("Resolution dimensions must be integers.")
-    if RESOLUTION[0] <= 0 or RESOLUTION[1] <= 0:
+    if resolution[0] <= 0 or resolution[1] <= 0:
         raise ValueError("Resolution dimensions must be positive integers.")
     
     supported_formats = ['PNG', 'JPEG', 'BMP']
@@ -347,12 +363,12 @@ def hyprland_set_wallpaper(image_path: str) -> None:
         raise ValueError(f"Unsupported image format: {img_format}. Supported formats are: {', '.join(supported_formats)}.")
     
     img = Image.open(image_path)
-    if img.size == RESOLUTION:
+    if img.size == resolution:
         print("Image is already in the desired resolution. No resizing needed.")
         img_resized = img
     else:
-        print(f"Resizing image from {img.size} to {RESOLUTION}.")
-        img_resized = img.resize(RESOLUTION, Image.Resampling.LANCZOS)
+        print(f"Resizing image from {img.size} to {resolution}.")
+        img_resized = img.resize(resolution, Image.Resampling.LANCZOS)
     
     if not img_resized.mode == 'RGB':
         print("Converting image to RGB mode.")
@@ -360,7 +376,8 @@ def hyprland_set_wallpaper(image_path: str) -> None:
     
     wallpaper_file = os.path.join(config_base, "hypr", "wallpaper.png")
     img_resized.save(wallpaper_file, format='PNG')
-    restart_service("hyprpaper")
+    subprocess.run(["systemctl", "--user", "restart", "hyprpaper"], check=True)
+
 
 def hyprland_set_border_color(color: str) -> None:
     """Sets the border color in Hyprland configuration."""
@@ -381,6 +398,7 @@ def hyprland_set_border_color(color: str) -> None:
     }
     update_config_file(config_path, updates)
     diff_configs(config_path)
+
 
 def hyprlock_set_color(color: str) -> None:
     """Sets the color in Hyprlock configuration."""
@@ -445,7 +463,8 @@ def waybar_color(color: str) -> None:
         r"@define-color background_color.*": f"@define-color background_color #{bg_color};",
         r"@define-color border_color.*": f"@define-color border_color     #{border_color};",
     }
-    update_config_file(config_path, updates, restart_svc="waybar")
+    update_config_file(config_path, updates)
+    subprocess.run(["systemctl", "--user", "restart", "waybar"], check=True)
     diff_configs(config_path)
 
 def wlogout_set_color(color: str) -> None:
