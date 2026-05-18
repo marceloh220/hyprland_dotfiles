@@ -13,10 +13,10 @@
  * General
  * ----------------------------------------------------- */
 
-@define-color background_color #bbc9e3;
+@define-color background_color #9a3c4c;
 @define-color normal_color     #fafafa;
 @define-color destak_color     #0f0f0f;
-@define-color border_color     #8896b0;
+@define-color border_color     #cd6f7f;
 @define-color buttons_color    @normal_color;
 @define-color text_color       @normal_color;
 @define-color icon_color       @normal_color;

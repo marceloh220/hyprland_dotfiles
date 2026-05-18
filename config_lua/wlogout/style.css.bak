@@ -14,9 +14,9 @@ by Stephan Raabe (2023)
  * Import Pywal colors
  * ----------------------------------------------------- */
 @import 'light_icons.css';
-@define-color background_color #191919;
-@define-color normal_color #141414;
-@define-color destak_color #474747;
+@define-color background_color #c14c60;
+@define-color normal_color #9a3c4c;
+@define-color destak_color #cd6f7f;
 /* -----------------------------------------------------
  * General
  * ----------------------------------------------------- */

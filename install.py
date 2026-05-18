@@ -27,11 +27,13 @@ PACKAGE_GROUPS = [
     ),
     (
         "fonts",
-        ["noto-fonts", "otf-fira-sans", "otf-font-awesome", "ttf-dejavu", "ttf-liberation", "ttf-meslo-nerd"],
+        ["noto-fonts", "otf-fira-sans", "otf-font-awesome", "ttf-dejavu", "ttf-liberation", 
+         "ttf-meslo-nerd"],
     ),
     (
         "hyprland",
-        ["hyprland", "hyprcursor", "hypridle", "hyprlock", "hyprpaper", "hyprpicker"],
+        ["hyprland-git", "hyprlang-git", "hyprutils-git", "hyprcursor-git", "hypridle-git", 
+         "hyprlock-git", "hyprpaper-git", "hyprpicker-git", "hyprwire-git"],
     ),
     (
         "hyprland-extras",
@@ -103,10 +105,11 @@ def list_all_packages() -> list[str]:
     return packages
 
 
-def print_packages_with_categories() -> None:
+def print_packages_with_categories(group: str) -> None:
     print("Packages to be processed:")
     for category, pkg_group in PACKAGE_GROUPS:
-        print(f" - {' '.join(pkg_group)} ({category})")
+        if group == "all" or category == group:
+            print(f" - {' '.join(pkg_group)} ({category})")
 
 def verify_distribution() -> None:
     base_supported = ("cachyos", "arch", "manjaro", "endeavouros", "arcolinux", "garuda", 
@@ -146,7 +149,7 @@ def ensure_yay_installed() -> None:
     print("yay installed successfully.")
 
 
-def install_packages() -> None:
+def install_packages(group: str) -> None:
     
     verify_distribution()
 
@@ -159,13 +162,23 @@ def install_packages() -> None:
 
     ensure_yay_installed()
 
-    print_packages_with_categories()
+    packages = list_all_packages()
+    if group != "all":
+        packages = []
+        for category, pkg_group in PACKAGE_GROUPS:
+            if category == group:
+                packages.extend(pkg_group)
+                break
+        if not packages:
+            print(f"No packages found for group '{group}'.")
+            sys.exit(1)
+
+    print_packages_with_categories(group=group)
     print("WARNING: Pay attention to the output for any errors during package installation.")
     ask_confirmation("Type YES to continue if you understand the risks and want to proceed: ")
-    
-    subprocess.run(["yay", "-S", "base-devel"])
-    packages = list_all_packages()
     print("Installing packages...")
+    subprocess.run(["yay", "-S", "base-devel"])
+    print(f"Installing packages: {' '.join(packages)}")
     subprocess.run(["yay", "-S", *packages], check=True)
 
 
@@ -402,6 +415,7 @@ if __name__ == "__main__":
     parser.add_argument("--add-wheel", action="store_true", help="Add the user to the wheel group for sudo access")
     parser.add_argument("--install-repository", action="store_true", help="Install the CachyOS repository")
     parser.add_argument("--install-packages", action="store_true", help="Install the list of packages")
+    parser.add_argument("--install-packages-group", type=str, default="all", help="Install a specific group of packages (e.g., 'audio', 'hyprland', 'kde', etc.)")
     parser.add_argument("--install-omf", action="store_true", help="Install Oh My Fish")
     parser.add_argument("--copy-dotfiles", action="store_true", help="Copy dotfiles to the user's home directory")
     parser.add_argument("--copy-dotfiles-lua", action="store_true", help="Copy dotfiles using the new lua configs to the user's home directory (Experimental)")
@@ -430,7 +444,7 @@ if __name__ == "__main__":
     elif args.install_repository:
         install_cachy_repository()
     elif args.install_packages:
-        install_packages()
+        install_packages(args.install_packages_group)
     elif args.copy_dotfiles:
         copy_dotfiles(lua=False)
     elif args.copy_dotfiles_lua:

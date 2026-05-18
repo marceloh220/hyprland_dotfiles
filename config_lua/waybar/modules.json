@@ -116,7 +116,7 @@
     "return-type": "json",
     "escape": true,
     "exec-on-event": true,
-    "interval": 5,
+    "interval": 3,
     "exec": "~/.config/hypr/scripts/hypridle.py --status",
     "on-click": "~/.config/hypr/scripts/hypridle.py --toggle"
   },
