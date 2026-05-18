@@ -19,7 +19,7 @@ PACKAGE_GROUPS = [
     ),
     (
         "display manager",
-        ["sddm", "sddm-sugar-candy-git"],
+        ["plasma-login-manager"],
     ),
     (
         "firewall",
@@ -36,7 +36,7 @@ PACKAGE_GROUPS = [
     (
         "hyprland-extras",
         ["blueman", "brightnessctl", "cliphist", "dunst", "grimblast-git", "power-profiles-daemon",
-         "rofi", "waybar", "wlogout"],
+         "rofi", "waybar-git", "wlogout"],
     ),
     (
         "kde",
@@ -49,7 +49,7 @@ PACKAGE_GROUPS = [
     ),
     (
         "network",
-        ["networkmanager"],
+        ["networkmanager", "network-manager-applet"],
     ),
     (
         "polkit agent",
@@ -69,6 +69,10 @@ PACKAGE_GROUPS = [
         ["bat", "btop", "cava", "curl", "eza", "fastfetch", "fish", "fzf", "git",
          "nano", "neovim", "openssh", "ranger", "rsync", "thefuck", "trash-cli",
          "wget", "zoxide"],
+    ),
+    (
+        "system",
+        ["mission-center"],
     ),
     (
         "themes",
@@ -230,10 +234,19 @@ def _update_mpd_music_directory(mpd_conf_path: Path, music_path: str) -> None:
     mpd_conf_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
 
 
-def copy_dotfiles() -> None:
+def copy_dotfiles(lua: bool) -> None:
     print("Copying dotfiles...")
     home_dir = Path.home()
     dotfiles_dir = Path("./config")
+    if lua:
+        dotfiles_dir = Path("./config_lua")
+        print("""Using Hyprland Lua configuration files from './config_lua' directory.
+              This is an experimental feature, and things may not work correctly.
+              Make sure to review the configuration files and adjust them as needed before copying.""")
+        confirmation = input("Type YES to continue if you understand the risks and want to proceed: ").strip()
+        if confirmation not in {"Y", "y", "YES", "yes"}:
+            print("Operation aborted by the user.")
+            sys.exit(0)
     config_dir = home_dir / ".config"
 
     print("WARNING: This may overwrite your existing Hyprland configuration.")
@@ -391,6 +404,7 @@ if __name__ == "__main__":
     parser.add_argument("--install-packages", action="store_true", help="Install the list of packages")
     parser.add_argument("--install-omf", action="store_true", help="Install Oh My Fish")
     parser.add_argument("--copy-dotfiles", action="store_true", help="Copy dotfiles to the user's home directory")
+    parser.add_argument("--copy-dotfiles-lua", action="store_true", help="Copy dotfiles using the new lua configs to the user's home directory (Experimental)")
     parser.add_argument("--sddm-theme-config", action="store_true", help="Configure SDDM theme to sugar-candy")
     parser.add_argument("--remove-repository", action="store_true", help="Remove the CachyOS repository")
     parser.add_argument("--remove-packages", action="store_true", help="Remove the list of packages")
@@ -418,7 +432,9 @@ if __name__ == "__main__":
     elif args.install_packages:
         install_packages()
     elif args.copy_dotfiles:
-        copy_dotfiles()
+        copy_dotfiles(lua=False)
+    elif args.copy_dotfiles_lua:
+        copy_dotfiles(lua=True)
     elif args.sddm_theme_config:
         sddm_theme_config()
     elif args.install_omf:

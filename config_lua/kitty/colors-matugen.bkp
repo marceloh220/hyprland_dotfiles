@@ -1,0 +1,8 @@
+cursor #eae0e7
+cursor_text_color #cfc3cd
+
+foreground            #eae0e7
+background            #161217
+selection_foreground  #3a2b3d
+selection_background  #d6c0d6
+url_color             #e7b6f0

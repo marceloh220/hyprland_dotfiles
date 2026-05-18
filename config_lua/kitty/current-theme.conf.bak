@@ -1,0 +1,86 @@
+# vim:ft=kitty
+
+## name: Base2Tone Mall Dark
+## author: Bram de Haan (https://github.com/atelierbram)
+## license: MIT
+## upstream: https://github.com/atelierbram/Base2Tone-kitty/blob/main/themes/base2tone-mall-dark.conf
+## blurb: duotone theme | blue violet - light sky blue
+
+
+#: The basic colors
+foreground #a5a9b4
+background #0c101b
+foreground #a5a9b4
+selection_background #a5a9b4
+selection_foreground #0c101b
+#: Cursor colors
+cursor #a5a9b4
+cursor_text_color #0c101b
+#: URL underline color when hovering with mouse
+
+url_color #e5dbff
+
+
+#: kitty window border colors and terminal bell colors
+
+active_border_color #515053
+inactive_border_color #1e1e1f
+bell_border_color #855ee8
+visual_bell_color none
+
+
+#: OS Window titlebar colors
+
+wayland_titlebar_color #2b2b2c
+macos_titlebar_color #2b2b2c
+
+
+#: Tab bar colors
+foreground #a5a9b4
+background #0c101b
+foreground #a5a9b4
+background #0c101b
+background #0c101b
+tab_bar_margin_color none
+
+
+#: Colors for marks (marked text in the terminal)
+foreground #a5a9b4
+background #0c101b
+foreground #a5a9b4
+background #0c101b
+foreground #a5a9b4
+background #0c101b
+#: The basic 16 colors
+
+#: black
+color0 #dfd5ba
+color8 #975b4c
+
+#: red
+color1 #4e4248
+color9 #cbb0c2
+
+#: green
+color2 #c26961
+color10 #bd843a
+
+#: yellow
+color3 #b8a397
+color11 #3b9bb8
+
+#: blue
+color4 #325b98
+color12 #0e3343
+
+#: magenta
+color5 #676665
+color13 #d2bda0
+
+#: cyan
+color6 #353a42
+color14 #89898f
+
+#: white
+color7 #c79674
+color15 #1a2334
