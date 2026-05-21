@@ -10,7 +10,7 @@ def check_hypridle_state() -> bool:
         return True
     else:
         return False
-    
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Toggle HyprIdle on or off.")

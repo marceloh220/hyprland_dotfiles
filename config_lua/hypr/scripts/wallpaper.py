@@ -37,17 +37,29 @@
 # your configurations before running the script.
 #
 # Usage:
-#       wallpaper.py Random
+#       wallpaper.py
 #   or:
 #       wallpaper.py /path/to/your/image.png
+#
+# Kitty theme can be set by providing a second argument with the mode, e.g.:
+#       wallpaper.py /path/to/your/image.png Precise
+# The available modes for Kitty are: Default, Precise, Random, Monochrome, Complementary.
+#   - Default: Uses a defined theme.
+#   - Precise: Uses colors extracted from the image that closely match with default colors.
+#   - Random: Uses a random color from the image in theme.
+#   - Monochrome: Uses a monochrome version of the dominant color.
+#   - Complementary: Uses the complementary color of colors extracted from the image.
+#
+# For more information run the script with the --help flag:
+#       wallpaper.py --help
 #
 # Ensure you have the python packages installed, e.g.:
 # pip install Pillow scikit-learn numpy
 #
-# Adjust the userDirectory variable to your home directory as needed.
 # Note: The script assumes you have Hyprland installed and configured correctly.
+# It's works on my dotfiles =p
 #
-# Copyright 2025 Marcelo H Moraes
+# Copyright 2025-2026 Marcelo H Moraes
 #
 # MIT License
 # 
@@ -71,10 +83,13 @@ import subprocess
 import os
 import random
 import sys
+import argparse
 import re
 import json
 import hashlib
-from typing import Optional, Tuple, List, Dict
+import shutil
+import time
+from typing import Optional, Tuple, List, Dict, Any, Callable
 from PIL import Image
 from sklearn.cluster import KMeans
 import numpy as np
@@ -84,10 +99,37 @@ WALLPAPER_PATH = "Imagens/wallpapers"
 CACHE_DIR = os.path.join(os.path.expanduser("~"), ".cache", "wallpaper_script")
 CACHE_FILE = os.path.join(CACHE_DIR, "colors.json")
 testing_config_path = "../../"
+VERBOSE = False
+DEBUG = False
 
 kitty_modes = ["Default", "Precise", "Random", "Monochrome", "Complementary"]
 
-def get_monitor_resolution() -> Tuple[int, int]:
+
+def vprint(message: str) -> None:
+    """Print informational logs only when verbose mode is enabled."""
+    if VERBOSE:
+        print(message)
+
+
+def debug_log(message: str) -> None:
+    """Print debug logs only when DEBUG is enabled."""
+    if DEBUG:
+        print(f"[DEBUG] {message}")
+
+
+def run_debug_step(step_name: str, func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
+    """Run a step and report elapsed time when debug mode is enabled."""
+    if not DEBUG:
+        return func(*args, **kwargs)
+
+    start = time.perf_counter()
+    debug_log(f"Starting: {step_name}")
+    result = func(*args, **kwargs)
+    elapsed_ms = (time.perf_counter() - start) * 1000
+    debug_log(f"Finished: {step_name} in {elapsed_ms:.2f} ms")
+    return result
+
+def get_monitor_resolution() -> Tuple[int, int, int]:
     """Get the current monitor resolution using Hyprctl."""
     try:
         result = subprocess.run(["hyprctl", "monitors", "-j"], capture_output=True, text=True, check=True)
@@ -98,19 +140,20 @@ def get_monitor_resolution() -> Tuple[int, int]:
         monitor = next((m for m in monitors if m.get("focused")), monitors[0])
         width = monitor.get("width")
         height = monitor.get("height")
+        scale = monitor.get("scale", 1)
 
         if not isinstance(width, int) or not isinstance(height, int):
             raise RuntimeError("Monitor width/height not found in hyprctl output.")
         
-        print(f"Detected monitor resolution: {width}x{height}")
+        vprint(f"Detected monitor resolution: {width}x{height} (scale: {scale})")
 
-        return width, height
+        return width, height, scale
     except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
         raise RuntimeError(f"Failed to get monitor resolution: {e}")
 
 
 def save_config(config_path: str) -> None:
-    subprocess.run(["cp", config_path, config_path+".bak"], check=True)
+    shutil.copy2(config_path, config_path + ".bak")
 
 
 def diff_configs(config_path: str) -> None:
@@ -120,12 +163,12 @@ def diff_configs(config_path: str) -> None:
         config_bak = f.read()
     
     if config != config_bak:
-        print(f"\nConfiguration file {config_path.split('/')[-1]} updated:")
+        vprint(f"Configuration file {config_path.split('/')[-1]} updated:")
         for line, line_bak in zip(config.splitlines(), config_bak.splitlines()):
             if line != line_bak:
-                print(f"  - {line.strip()} (was: {line_bak.strip()})")
+                vprint(f"  - {line.strip()} (was: {line_bak.strip()})")
     else:
-        print(f"\nNo changes detected in the configuration file {config_path.split('/')[-1]}.")
+        vprint(f"No changes detected in the configuration file {config_path.split('/')[-1]}.")
 
 
 def get_config_dir() -> str:
@@ -160,9 +203,12 @@ def get_cached_dominant_colors(image_path: str, n_colors: int = 16) -> List[str]
             with open(CACHE_FILE, "r") as f:
                 cache = json.load(f)
                 if cache_key in cache:
+                    debug_log(f"Color cache hit for key: {cache_key}")
                     return cache[cache_key]
         except (json.JSONDecodeError, IOError):
             pass
+
+    debug_log(f"Color cache miss for key: {cache_key}")
     
     colors = extract_dominant_colors(image_path, n_colors)
     
@@ -180,7 +226,7 @@ def get_cached_dominant_colors(image_path: str, n_colors: int = 16) -> List[str]
     return colors
 
 
-def update_config_file(config_path: str, updates: Dict[str, str]) -> None:
+def update_config_file(config_path: str, updates: Dict[str, str]) -> bool:
     """Generic function to update config file with multiple regex substitutions.
     
     Args:
@@ -193,12 +239,19 @@ def update_config_file(config_path: str, updates: Dict[str, str]) -> None:
     
     with open(config_path, "r") as f:
         config = f.read()
+
+    original_config = config
     
     for pattern, replacement in updates.items():
         config = re.sub(pattern, replacement, config)
-    
+
+    if config == original_config:
+        return False
+
+    save_config(config_path)
     with open(config_path, "w") as f:
         f.write(config)
+    return True
 
 
 def extract_dominant_colors(image_path: str, n_colors: int = 1) -> List[str]:
@@ -210,19 +263,24 @@ def extract_dominant_colors(image_path: str, n_colors: int = 1) -> List[str]:
     if n_colors < 1:
         raise ValueError("Number of colors must be at least 1.")
 
-    img = Image.open(image_path)
-    if img.format not in ['PNG', 'JPEG', 'BMP']:
-        raise ValueError(f"Unsupported image format: {img.format}. Supported formats are: PNG, JPEG, BMP.")
-    if img.mode not in ['RGB', 'RGBA']:
-        raise ValueError(f"Unsupported image mode: {img.mode}. Supported modes are: RGB, RGBA.")
+    with Image.open(image_path) as img:
+        if img.format not in ['PNG', 'JPEG', 'BMP']:
+            raise ValueError(f"Unsupported image format: {img.format}. Supported formats are: PNG, JPEG, BMP.")
+        if img.mode not in ['RGB', 'RGBA']:
+            raise ValueError(f"Unsupported image mode: {img.mode}. Supported modes are: RGB, RGBA.")
 
-    if img.mode != 'RGB':
-        print(f"Converting image {image_path} to RGB mode.")
-        img = img.convert("RGB")
+        if img.mode != 'RGB':
+            vprint(f"Converting image {image_path} to RGB mode.")
+            img = img.convert("RGB")
 
-    img = img.resize((100, 100), Image.Resampling.LANCZOS)
-    pixels = np.array(img)
-    pixels = pixels.reshape(-1, 3)
+        img = img.resize((100, 100), Image.Resampling.LANCZOS)
+        pixels = np.asarray(img, dtype=np.uint8).reshape(-1, 3)
+
+    # Keep KMeans fast on very large datasets by sampling a capped number of pixels.
+    max_samples = 5000
+    if pixels.shape[0] > max_samples:
+        idx = np.random.default_rng(42).choice(pixels.shape[0], size=max_samples, replace=False)
+        pixels = pixels[idx]
 
     kmeans = KMeans(n_clusters=n_colors, random_state=42, n_init='auto')
     kmeans.fit(pixels)
@@ -331,13 +389,13 @@ def get_random_image(directory):
     # Ensure the directory is a valid directory
     if not os.path.isdir(directory):
         raise ValueError(f"Provided path is not a directory: {directory}")
-    # List all image files in the directory
-    images = [f for f in os.listdir(directory) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp'))]
+    # List all image files in the directory using scandir (faster than listdir for metadata access)
+    images = [entry.path for entry in os.scandir(directory) if entry.is_file() and entry.name.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp'))]
     # Ensure there are images in the directory
     if not images:
         raise FileNotFoundError("No images found in the directory.")
     # Select a random image from the list
-    return os.path.join(directory, random.choice(images))
+    return random.choice(images)
 
 
 def hyprland_set_wallpaper(image_path: str) -> None:
@@ -349,6 +407,7 @@ def hyprland_set_wallpaper(image_path: str) -> None:
         raise FileNotFoundError(f"Image file not found: {image_path}")
     
     resolution = get_monitor_resolution()
+    resolution = (int(resolution[0] * resolution[2]), int(resolution[1] * resolution[2]))  # Apply scale factor
     
     if not isinstance(resolution, tuple) or len(resolution) != 2:
         raise ValueError("Resolution must be a tuple of (width, height).")
@@ -358,23 +417,23 @@ def hyprland_set_wallpaper(image_path: str) -> None:
         raise ValueError("Resolution dimensions must be positive integers.")
     
     supported_formats = ['PNG', 'JPEG', 'BMP']
-    img_format = Image.open(image_path).format
-    if img_format not in supported_formats:
-        raise ValueError(f"Unsupported image format: {img_format}. Supported formats are: {', '.join(supported_formats)}.")
-    
-    img = Image.open(image_path)
-    if img.size == resolution:
-        print("Image is already in the desired resolution. No resizing needed.")
-        img_resized = img
-    else:
-        print(f"Resizing image from {img.size} to {resolution}.")
-        img_resized = img.resize(resolution, Image.Resampling.LANCZOS)
-    
-    if not img_resized.mode == 'RGB':
-        print("Converting image to RGB mode.")
-        img_resized = img_resized.convert('RGB')
-    
     wallpaper_file = os.path.join(config_base, "hypr", "wallpaper.png")
+
+    with Image.open(image_path) as img:
+        if img.format not in supported_formats:
+            raise ValueError(f"Unsupported image format: {img.format}. Supported formats are: {', '.join(supported_formats)}.")
+
+        if img.size == resolution:
+            vprint("Image is already in the desired resolution. No resizing needed.")
+            img_resized = img.copy()
+        else:
+            vprint(f"Resizing image from {img.size} to {resolution}.")
+            img_resized = img.resize(resolution, Image.Resampling.LANCZOS)
+
+        if img_resized.mode != 'RGB':
+            vprint("Converting image to RGB mode.")
+            img_resized = img_resized.convert('RGB')
+
     img_resized.save(wallpaper_file, format='PNG')
     subprocess.run(["systemctl", "--user", "restart", "hyprpaper"], check=True)
 
@@ -383,8 +442,7 @@ def hyprland_set_border_color(color: str) -> None:
     """Sets the border color in Hyprland configuration."""
     validate_hex_color(color)
     config_path = os.path.join(get_config_dir(), "hypr", "modules", "decorator.lua")
-    save_config(config_path)
-    
+
     active_border_color = lighten_color(color)
     active_border_color1 = color
     inactive_border_color = darken_color(color)
@@ -396,16 +454,16 @@ def hyprland_set_border_color(color: str) -> None:
         ),
         r"(?m)^\s*inactive_border\s*=.*$": f"            inactive_border = \"rgba({inactive_border_color}aa)\",",
     }
-    update_config_file(config_path, updates)
-    diff_configs(config_path)
+    if update_config_file(config_path, updates):
+        diff_configs(config_path)
+    else:
+        vprint(f"No changes detected in the configuration file {os.path.basename(config_path)}.")
 
 
 def hyprlock_set_color(color: str) -> None:
     """Sets the color in Hyprlock configuration."""
     validate_hex_color(color)
     config_path = os.path.join(get_config_dir(), "hypr", "hyprlock.conf")
-    save_config(config_path)
-
     with open(config_path, "r") as f:
         current_config = f.read()
 
@@ -435,16 +493,17 @@ def hyprlock_set_color(color: str) -> None:
             r"\$color_destak\s*=.*": f"$color_destak = rgba({destak_color}ff)",
         }
 
-    update_config_file(config_path, updates)
-    diff_configs(config_path)
+    if update_config_file(config_path, updates):
+        diff_configs(config_path)
+    else:
+        vprint(f"No changes detected in the configuration file {os.path.basename(config_path)}.")
 
 
 def waybar_color(color: str) -> None:
     """Sets the color in Waybar configuration."""
     validate_hex_color(color)
     config_path = os.path.join(get_config_dir(), "waybar", "style.css")
-    save_config(config_path)
-    
+
     light_color = lighten_color(color)
     dark_color = darken_color(color)
     brightness = get_brightness(color)
@@ -463,16 +522,17 @@ def waybar_color(color: str) -> None:
         r"@define-color background_color.*": f"@define-color background_color #{bg_color};",
         r"@define-color border_color.*": f"@define-color border_color     #{border_color};",
     }
-    update_config_file(config_path, updates)
-    subprocess.run(["systemctl", "--user", "restart", "waybar"], check=True)
-    diff_configs(config_path)
+    if update_config_file(config_path, updates):
+        subprocess.run(["systemctl", "--user", "restart", "waybar"], check=True)
+        diff_configs(config_path)
+    else:
+        vprint(f"\nNo changes detected in the configuration file {os.path.basename(config_path)}.")
 
 def wlogout_set_color(color: str) -> None:
     """Sets the color in wlogout configuration."""
     validate_hex_color(color)
     config_path = os.path.join(get_config_dir(), "wlogout", "style.css")
-    save_config(config_path)
-    
+
     brightness = get_brightness(color)
     if brightness < 128:
         import_line = "@import 'light_icons.css';"
@@ -489,16 +549,17 @@ def wlogout_set_color(color: str) -> None:
         r"@define-color normal_color.*": f"@define-color normal_color #{normal_color};",
         r"@define-color destak_color.*": f"@define-color destak_color #{destak_color};",
     }
-    update_config_file(config_path, updates)
-    diff_configs(config_path)
+    if update_config_file(config_path, updates):
+        diff_configs(config_path)
+    else:
+        vprint(f"No changes detected in the configuration file {os.path.basename(config_path)}.")
 
 
 def rofi_set_color(color: str) -> None:
     """Sets the color in rofi configuration."""
     validate_hex_color(color)
     config_path = os.path.join(get_config_dir(), "rofi", "colors.rasi")
-    save_config(config_path)
-    
+
     brightness = get_brightness(color)
     dark_color = darken_color(color)
     light_color = lighten_color(color)
@@ -507,17 +568,40 @@ def rofi_set_color(color: str) -> None:
     text_color_select = "fafafa" if brightness < 128 else "0a0a0a"
     color_rgb = hex_to_rgb(light_color)
     bg_rgba = f"rgba({color_rgb[0]}, {color_rgb[1]}, {color_rgb[2]}, 0.7)"
-    
+
     updates = {
-        r"(?m)^\s*primary:\s*#[0-9a-fA-F]{6};\s*$": f"    primary: #{primary};",
-        r"(?m)^\s*on-surface:\s*#[0-9a-fA-F]{6};\s*$": "    on-surface: #0f0f0f;",
-        r"(?m)^\s*on-surface-variant:\s*#[0-9a-fA-F]{6};\s*$": "    on-surface-variant: #fafafa;",
-        r"(?m)^\s*on-primary-fixed:\s*#[0-9a-fA-F]{6};\s*$": f"    on-primary-fixed: #{dark_color};",
-        r"(?m)^\s*background:\s*rgba\([^)]+\);\s*$": f"    background: {bg_rgba};",
-        r"(?m)^\s*text-color-select:\s*#[0-9a-fA-F]{6};\s*$": f"    text-color-select: #{text_color_select};",
+        "background": bg_rgba,
+        "primary": f"#{primary}",
+        "on-surface": "#0f0f0f",
+        "on-surface-variant": "#fafafa",
+        "on-primary-fixed": f"#{dark_color}",
+        "text-color-select": f"#{text_color_select}",
     }
-    update_config_file(config_path, updates)
-    diff_configs(config_path)
+
+    with open(config_path, "r") as f:
+        config = f.read()
+
+    original_config = config
+
+    for key, value in updates.items():
+        pattern = rf"(?m)^(\s*{re.escape(key)}\s*:\s*).*$"
+        replacement = rf"\1{value};"
+        config, count = re.subn(pattern, replacement, config, count=1)
+
+        if count == 0:
+            # Preserve the theme block even if the target key is missing.
+            insertion = f"    {key}: {value};"
+            closing_brace = re.search(r"(?m)^}\s*$", config)
+            if closing_brace:
+                config = f"{config[:closing_brace.start()].rstrip()}\n{insertion}\n{config[closing_brace.start():]}"
+
+    if config != original_config:
+        save_config(config_path)
+        with open(config_path, "w") as f:
+            f.write(config)
+        diff_configs(config_path)
+    else:
+        vprint(f"No changes detected in the configuration file {os.path.basename(config_path)}.")
 
 
 def kitty_set_color(color_list: List[str], mode: str = "Default") -> None:
@@ -525,13 +609,13 @@ def kitty_set_color(color_list: List[str], mode: str = "Default") -> None:
     if mode not in kitty_modes:
         raise ValueError(f"Invalid mode. Supported modes are: {', '.join(kitty_modes)}.")
     config_path = os.path.join(get_config_dir(), "kitty", "theme.conf")
-    save_config(config_path)
-    
+
     for color in color_list:
         validate_hex_color(color)
     
     with open(config_path, "r") as f:
         config = f.read()
+    original_config = config
     
     brightness = get_brightness(color_list[0])
     dark_color = darken_color(color_list[0], .6)
@@ -618,67 +702,93 @@ def kitty_set_color(color_list: List[str], mode: str = "Default") -> None:
             complementary_color = rgb_to_hex((comp_r, comp_g, comp_b))
             config = re.sub(f"color{i} #.*", f"color{i} #{complementary_color}", config)
     
-    with open(config_path, "w") as f:
-        f.write(config)
+    if config != original_config:
+        save_config(config_path)
+        with open(config_path, "w") as f:
+            f.write(config)
 
-    subprocess.run(["kitty", "@", "set-colors", config_path], check=True)
+        subprocess.run(["kitty", "@", "set-colors", config_path], check=True)
+        diff_configs(config_path)
+    else:
+        vprint(f"No changes detected in the configuration file {os.path.basename(config_path)}.")
 
-    diff_configs(config_path)
+
+def parse_args() -> argparse.Namespace:
+    """Parse CLI arguments."""
+    parser = argparse.ArgumentParser(
+        description="Set Hyprland wallpaper and propagate colors to related configs.",
+    )
+    parser.add_argument(
+        "inputs",
+        nargs="*",
+        help="Image path and/or kitty mode.",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable verbose logs and step timing output.",
+    )
+    return parser.parse_args()
 
 def main() -> None:
     """Main function to run the wallpaper script."""
+    global VERBOSE, DEBUG
+
+    args = parse_args()
+    VERBOSE = args.verbose
+    DEBUG = args.verbose
+
     userDirectory = os.path.expanduser("~")
+    debug_log("Verbose/debug mode is enabled.")
 
-    if len(sys.argv) > 1:
-        print(f"Argument provided: {sys.argv[1]}")
+    if args.inputs:
+        vprint(f"Arguments provided: {' '.join(args.inputs)}")
 
-    random = False
     kitty_mode = "Default"
     image = None
 
-    for arg in sys.argv[1:]:
-        if arg == "Random":
-            random = True
-        elif arg in kitty_modes:
+    for arg in args.inputs:
+        if arg in kitty_modes:
             kitty_mode = arg
         elif os.path.exists(arg):
             image = arg
         else:
             print(f"Invalid argument: {arg}")
 
-    print("Starting wallpaper script...")
+    vprint("Starting wallpaper script...")
     if not image:
-        print("No image provided, selecting a random wallpaper...")
+        vprint("No image provided, selecting a random wallpaper...")
         wallpapers_dir = os.path.join(userDirectory, WALLPAPER_PATH)
         if not os.path.exists(wallpapers_dir):
             raise FileNotFoundError(f"Wallpapers directory does not exist: {wallpapers_dir}")
-        print(f"Looking for wallpapers in: {wallpapers_dir}")
+        vprint(f"Looking for wallpapers in: {wallpapers_dir}")
         image = get_random_image(wallpapers_dir)
     else:
         image = image.strip('"')  # Remove quotes if the path is provided with them
         if not os.path.exists(image):
             raise FileNotFoundError(f"Image file does not exist: {image}")
-        print(f"Using provided image: {image}")
+        vprint(f"Using provided image: {image}")
         if not image.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
             raise ValueError("Selected file is not a valid image format. Supported formats are: PNG, JPEG, BMP.")
 
-    print(f"Selected wallpaper: {image}")
-    hyprland_set_wallpaper(image)
+    vprint(f"Selected wallpaper: {image}")
+    run_debug_step("set wallpaper", hyprland_set_wallpaper, image)
 
-    dominant_color = get_cached_dominant_colors(image, n_colors=16)
+    dominant_color = run_debug_step("extract dominant colors", get_cached_dominant_colors, image, n_colors=16)
 
     if not dominant_color:
         raise ValueError("No dominant color found in the image.")
 
-    hyprland_set_border_color(dominant_color[0])
-    hyprlock_set_color(dominant_color[0])
-    waybar_color(dominant_color[0])
-    wlogout_set_color(dominant_color[0])
-    rofi_set_color(dominant_color[0])
-    kitty_set_color(dominant_color, mode=kitty_mode)
+    run_debug_step("update hyprland border", hyprland_set_border_color, dominant_color[0])
+    run_debug_step("update hyprlock", hyprlock_set_color, dominant_color[0])
+    run_debug_step("update waybar", waybar_color, dominant_color[0])
+    run_debug_step("update wlogout", wlogout_set_color, dominant_color[0])
+    run_debug_step("update rofi", rofi_set_color, dominant_color[0])
+    run_debug_step("update kitty", kitty_set_color, dominant_color, mode=kitty_mode)
 
-    print("\nAll configurations updated successfully.")
-    print(f"Primary color: {dominant_color[0]} (brightness: {get_brightness(dominant_color[0]):.0f})")
+    vprint("All configurations updated successfully.")
+    vprint(f"Primary color: {dominant_color[0]} (brightness: {get_brightness(dominant_color[0]):.0f})")
 
 
 if __name__ == "__main__":
@@ -687,9 +797,9 @@ if __name__ == "__main__":
     except (ValueError, FileNotFoundError, OSError, ImportError, PermissionError, RuntimeError) as e:
         print(f"Error: {e}")
     except KeyboardInterrupt:
-        print("\nScript interrupted by user.")
+        print("Script interrupted by user.")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
     finally:
-        print("Exiting the script. Goodbye!")
+        vprint("Exiting the script. Goodbye!")
         sys.exit(0)

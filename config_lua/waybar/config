@@ -37,24 +37,17 @@
 
     // Modules Center
     "modules-center": [
+        "group/hardware",
         "clock",
         "custom/empty"
     ],
 
     // Modules Right    
     "modules-right": [
-        //"custom/wallpaper",
-        //"custom/updates",
         "pulseaudio",
         "backlight",
         "network",
-        //"bluetooth",
-	    //"custom/hypridle",
-        //"battery",
-        //"power-profiles-daemon",
-        "group/hardware",
-        //"custom/cliphist",
-        //"group/tools",
+        "group/tools",
         "tray",
         //"custom/notification",
         "custom/exit"

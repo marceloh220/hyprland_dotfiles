@@ -61,18 +61,6 @@
     "tooltip-format": "Left: Open clipboard Manager\nRight: Delete an entry\nMiddle: Clear list"
   },
 
-  "custom/updates": {
-    "format": "  {}",
-    "escape": true,
-    "return-type": "json",
-    "exec": "~/.config/hypr/scripts/updates.sh",
-    "interval": 1800,
-    "signal": 1,
-    "hide-empty-text": true,
-    "on-click": "kitty ~/.config/hypr/scripts/installupdates.sh",
-    "on-click-right": "kitty ~/.config/hypr/scripts/software.sh"
-  },
-
   "custom/wallpaper": {
     "format": "",
     "on-click": "~/.config/hypr/scripts/wallpaper.py Default",
@@ -81,7 +69,7 @@
 
   "custom/exit": {
     "format": "",
-    "on-click": "~/.config/hypr/scripts/wlogout.sh",
+    "on-click": "~/.config/hypr/scripts/wlogout.py",
     "on-click-right": "hyprlock",
     "tooltip-format": "Left: Power menu\nRight: Lock screen"
   },
@@ -156,32 +144,32 @@
   "custom/system": {
     "format": "",
     "tooltip": true,
-    "tooltip-format": "Right: System monitor",
-    "on-click": "~/.config/hypr/scripts/system-monitor.sh"
+    "tooltip-format": "System monitor",
+    "on-click": "~/.config/hypr/scripts/system-monitor.py missioncenter"
   },
 
   "cpu": {
-    "format": "/   {usage}% ",
-    "on-click": "~/.config/hypr/scripts/system-monitor.sh"
+    "format": "    {usage}%\t",
+    "on-click": "~/.config/hypr/scripts/system-monitor.py missioncenter"
   },
 
   "memory": {
-    "format": "/    {}% ",
-    "on-click": "~/.config/hypr/scripts/system-monitor.sh"
+    "format": "    {}%\t",
+    "on-click": "~/.config/hypr/scripts/system-monitor.py missioncenter"
   },
 
   "disk#1": {
     "interval": 30,
-    "format": " Raiz {percentage_used}% ",
+    "format": "  Disk {percentage_used}%\t",
     "path": "/",
-    "on-click": "~/.config/hypr/scripts/system-monitor.sh"
+    "on-click": "~/.config/hypr/scripts/system-monitor.py missioncenter"
   },
   
   "disk#2": {
     "interval": 30,
-    "format": "/  Home {percentage_used}% ",
+    "format": "  Home {percentage_used}%\t",
     "path": "/home",
-    "on-click": "~/.config/hypr/scripts/system-monitor.sh"
+    "on-click": "~/.config/hypr/scripts/system-monitor.py missioncenter"
   },
 
   "hyprland/language": {
@@ -197,13 +185,9 @@
     },
     "modules": [
     	"custom/system",
-      "custom/updates",
-      "bluetooth",
-      "battery",
-      "power-profiles-daemon",
-      "custom/hypridle",
-      "custom/cliphist",
-      "custom/wallpaper"
+      "cpu",
+      "memory",
+      "disk#1"
     ]
   },
 
@@ -216,9 +200,12 @@
     },
     "modules": [
       "custom/tools",
-      "custom/wallpaper",
+      "bluetooth",
+      "battery",
+      "power-profiles-daemon",
       "custom/hypridle",
-      "custom/cliphist"
+      "custom/cliphist",
+      "custom/wallpaper"
     ]
   },
 

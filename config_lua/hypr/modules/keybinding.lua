@@ -86,7 +86,7 @@ hl.bind(mainMod .. " + Q",
 )
 
 hl.bind(mainMod .. " + SHIFT + Q",      
-		hl.dsp.exec_cmd(SCRIPTS .. "/wlogout.sh"), 
+		hl.dsp.exec_cmd(SCRIPTS .. "/wlogout.py"), 
 		{description = "Quit active window and all open instances"}
 )
 

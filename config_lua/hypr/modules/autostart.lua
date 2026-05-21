@@ -5,19 +5,20 @@
 
 hl.on("hyprland.start", function()
 
-    -- Set Cursor (are in hyprland.conf for fast change)
+    -- Set Cursor
     hl.exec_cmd("hyprctl setcursor Bibata-Modern-Ice 24")
 
     -- Start hyprctl monitor for autostart
     hl.exec_cmd("hyprctl --watch reload")
 
-    -- Setup XDG for screen sharing
-    hl.exec_cmd("~/.config/hypr/scripts/xdg.sh")
+    -- Start xdg-desktop-portal and xdg-desktop-portal-hyprland for screen sharing
+    hl.exec_cmd("systemctl --user start xdg-desktop-portal")
+    hl.exec_cmd("systemctl --user start xdg-desktop-portal-hyprland")
 
     -- Start kde files open configuration
     hl.exec_cmd("kbuildsycoca6")
 
-    -- Start hypridle for screen locking and power management (not working yet)
+    -- Start hypridle for screen locking and power management
     hl.exec_cmd("systemctl --user start hypridle")
 
     -- Start Polkit
@@ -25,10 +26,17 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
 
     -- Load Wallpaper
-    hl.exec_cmd("systemctl --user start hyprpaper.service")
+    hl.exec_cmd("systemctl --user start hyprpaper")
 
     -- Load waybar
     hl.exec_cmd("systemctl --user start waybar")
+
+    -- Load wireplumber for audio management
+    hl.exec_cmd("systemctl --user start pipewire")
+    hl.exec_cmd("systemctl --user start wireplumber")
+
+    -- Load mpd for music management
+    hl.exec_cmd("systemctl --user start mpd")
 
     -- Load Notification Daemon (aaargh, I don't like notifications ¬¬)
     -- hl.exec_cmd("swaync")

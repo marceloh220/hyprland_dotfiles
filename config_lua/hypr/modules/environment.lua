@@ -21,8 +21,9 @@ hl.env("CLUTTER_BACKEND", "wayland")
 -- Mozilla
 hl.env("MOZ_ENABLE_WAYLAND", "1")
 
--- Set the cursor size for xcursor
-hl.env("XCURSOR_SIZE", "24")
+-- Cursor settings (are in autostart too)
+hl.env("HYPRCURSOR_THEME", "Bibata-Modern-Ice")
+hl.env("HYPRCURSOR_SIZE", "24")
 
 -- Correct scaling for Electron apps
 hl.env("OZONE_PLATFORM", "wayland")

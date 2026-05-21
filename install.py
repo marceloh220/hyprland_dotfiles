@@ -3,6 +3,7 @@
 
 import os
 import subprocess
+from shutil import which
 import sys
 import argparse
 from pathlib import Path
@@ -32,8 +33,7 @@ PACKAGE_GROUPS = [
     ),
     (
         "hyprland",
-        ["hyprland-git", "hyprlang-git", "hyprutils-git", "hyprcursor-git", "hypridle-git", 
-         "hyprlock-git", "hyprpaper-git", "hyprpicker-git", "hyprwire-git"],
+        ["hyprland-git", "hypridle-git", "hyprlock-git", "hyprpaper-git", "hyprpicker-git"],
     ),
     (
         "hyprland-extras",
@@ -132,6 +132,9 @@ def verify_distribution() -> None:
 
 
 def ensure_yay_installed() -> None:
+    if which("yay") is not None:
+        print("yay is already installed.")
+        return
     print("Trying to install yay from the official Arch repositories...")
     yay_in_repo = subprocess.run(["sudo", "pacman", "-Sy", "--noconfirm", "yay"], text=True)
     if yay_in_repo.returncode == 0:
@@ -160,6 +163,10 @@ def install_packages(group: str) -> None:
     print("Make sure to review the package list and the installation process for any errors.")
     ask_confirmation("Type YES to continue if you understand the risks and want to proceed: ")
 
+    if which("base-devel") is None:
+        print("base-devel is not installed. Installing base-devel...")
+        subprocess.run(["sudo", "pacman", "-Sy", "--noconfirm", "base-devel"], check=True)
+
     ensure_yay_installed()
 
     packages = list_all_packages()
@@ -177,7 +184,6 @@ def install_packages(group: str) -> None:
     print("WARNING: Pay attention to the output for any errors during package installation.")
     ask_confirmation("Type YES to continue if you understand the risks and want to proceed: ")
     print("Installing packages...")
-    subprocess.run(["yay", "-S", "base-devel"])
     print(f"Installing packages: {' '.join(packages)}")
     subprocess.run(["yay", "-S", *packages], check=True)
 
@@ -313,7 +319,6 @@ def copy_dotfiles(lua: bool) -> None:
     music_path = subprocess.run(["xdg-user-dir", "MUSIC"], check=True, text=True, capture_output=True).stdout.strip()
     _update_mpd_music_directory(mpd_config_dir / "mpd.conf", music_path)
 
-    subprocess.run(["systemctl", "enable", "--now", "--user", "mpd"], check=True)
     pictures_path = subprocess.run(
         ["xdg-user-dir", "PICTURES"], check=True, text=True, capture_output=True
     ).stdout.strip()
