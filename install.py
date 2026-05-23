@@ -14,6 +14,9 @@ PACKAGE_GROUPS = [
         "audio",
         ["pamixer", "pavucontrol", "pipewire-alsa", "pipewire-jack", "pipewire-pulse", "wireplumber"],
     ),
+    ("base",
+        ["base-devel", "git", "nano", "sudo"],
+    ),
     (
         "compression",
         ["7zip", "unrar", "unzip"],
@@ -33,7 +36,7 @@ PACKAGE_GROUPS = [
     ),
     (
         "hyprland",
-        ["hyprland-git", "hypridle-git", "hyprlock-git", "hyprpaper-git", "hyprpicker-git"],
+        ["hyprland", "hypridle", "hyprlock", "hyprpaper", "hyprpicker"],
     ),
     (
         "hyprland-extras",
@@ -51,7 +54,7 @@ PACKAGE_GROUPS = [
     ),
     (
         "network",
-        ["networkmanager", "network-manager-applet"],
+        ["networkmanager", "iwd", "nmtui", "wireless-regdb"],
     ),
     (
         "polkit agent",
@@ -69,7 +72,7 @@ PACKAGE_GROUPS = [
     (
         "terminal-extra",
         ["bat", "btop", "cava", "curl", "eza", "fastfetch", "fish", "fzf", "git",
-         "nano", "neovim", "openssh", "ranger", "rsync", "thefuck", "trash-cli",
+         "neovim", "openssh", "ranger", "rsync", "thefuck", "trash-cli",
          "wget", "zoxide"],
     ),
     (
